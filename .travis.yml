@@ -1,0 +1,11 @@
+language: c
+
+compiler:
+  - gcc
+
+script:
+  - make CXXFLAGS=--coverage check
+  - gcov -a heat
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
