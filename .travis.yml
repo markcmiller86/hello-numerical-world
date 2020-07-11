@@ -6,8 +6,9 @@ compiler:
 script:
   - wget -O - https://codecov.io/gh/markcmiller86/hello-numerical-world 2>/dev/null | grep -A 25 'Project Totals' | grep -e '^[0-9\.]*%' | tr -d '\.%' > old_coverage.txt
   - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check
+  - echo $? > TEST_RESULT.txt
   - gcov -a heat
-  - bash <(curl -s https://codecov.io/bash) -v -Z
+  - env TRAVIS_TEST_RESULT="$(cat TEST_RESULT.txt)" bash <(curl -s https://codecov.io/bash) -v -Z
   - cp old_coverage.txt new_coverage.txt
   - cat old_coverage.txt
   - |
