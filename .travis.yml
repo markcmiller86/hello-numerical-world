@@ -4,8 +4,21 @@ compiler:
   - gcc
 
 script:
+  - wget -O - https://codecov.io/gh/markcmiller86/hello-numerical-world | grep -A 25 'Project Totals' | grep -e '^[0-9\.]*%' | tr -d '\.%' > old_coverage.txt
   - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check_all
   - gcov -a heat
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -v -Z
+  - cp old_coverage.txt new_coverage.txt
+  - |
+    i=0
+    while [[ "$(cat old_coverage.txt)" = "$(cat new_coverage.txt)" && $i -lt 10 ]]
+    do
+        sleep 15
+        i=$(expr $i + 1)
+        wget -O - https://codecov.io/gh/markcmiller86/hello-numerical-world | grep -A 25 'Project Totals' | grep -e '^[0-9\.]*%' | tr -d '\.%' > new_coverage.txt
+    done
+    if [[ $(cat new_coverage.txt) -ge $(cat old_coverage.txt) ]]; then
+        exit 0
+    else
+        exit 1
+    fi
