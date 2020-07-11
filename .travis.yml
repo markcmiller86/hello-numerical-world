@@ -4,7 +4,7 @@ compiler:
   - gcc
 
 script:
-  - make CXXFLAGS=--coverage check
+  - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check
   - gcov -a heat
 
 after_success:

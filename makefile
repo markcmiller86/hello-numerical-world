@@ -13,7 +13,7 @@ EXE = heat
 
 # Linking the final heat app
 heat: $(OBJ)
-	$(CXX) -o heat $(OBJ) -lm
+	$(CXX) -o heat $(OBJ) $(LDFLAGS) -lm
 
 clean:
 	$(RM) $(OBJ) $(EXE)
