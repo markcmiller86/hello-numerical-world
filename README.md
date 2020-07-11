@@ -1,7 +1,8 @@
 # Hello Numerical World
 
 In this repo is a very simple implementation of an application for solving the one dimensional
-heat conduction equation.
+heat conduction equation. This is the functional equivalent of a *Hello World* application for
+HPC/CSE numerical programmers.
 
 In general, heat [conduction](https://en.wikipedia.org/wiki/Thermal_conduction) is governed
 by the partial differential (PDE)...
