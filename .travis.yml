@@ -9,10 +9,13 @@ script:
   - gcov -a heat
   - bash <(curl -s https://codecov.io/bash) -v -Z
   - cp old_coverage.txt new_coverage.txt
+  - cat old_coverage.txt
   - |
     i=0
     while [[ $(cat old_coverage.txt) -lt 10000 && $(cat old_coverage.txt) -eq $(cat new_coverage.txt) && $i -lt 10 ]]
     do
+        cat old_coverage.txt
+        cat new_coverage.txt
         echo "Checking if coverage has improved [attempt $i of 10]"
         sleep 15
         i=$(expr $i + 1)
