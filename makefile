@@ -17,6 +17,17 @@ heat: $(OBJ)
 
 clean:
 	$(RM) $(OBJ) $(EXE)
+	$(RM) -rf check
 
 plot:
 	@./tools/run_$(PTOOL).sh $(RUNAME)
+
+#
+# Run for a long time with random initial condition
+# and confirm linear stead-state upon termination
+#
+check/check_soln_final.curve:
+	./heat runame=check outi=0 maxt=-0.5e-7 ic="rand(0,0.2,2)"
+
+check: heat check/check_soln_final.curve
+	./check.sh check/check_soln_final.curve 0

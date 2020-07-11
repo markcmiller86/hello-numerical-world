@@ -123,7 +123,7 @@ set_initial_condition(int n, Double *a, Double dx, char const *ic)
         for (i = 0; i < n; i++)
             a[i] = base + amp * (2*random()/maxr - 1);
     }
-    else if (!strncmp(ic, "sin(Pi*x)", 9)) /* rand(seed,amp) */
+    else if (!strncmp(ic, "sin(Pi*x)", 9)) /* sin(PI*x) */
     {
         for (i = 0, x = 0; i < n; i++, x+=dx)
             a[i] = sin(M_PI*x);
