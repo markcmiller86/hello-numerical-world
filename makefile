@@ -27,7 +27,7 @@ plot:
 # and confirm linear stead-state upon termination
 #
 check/check_soln_final.curve:
-	./heat runame=check outi=0 maxt=-0.5e-7 ic="rand(0,0.2,2)"
+	./heat runame=check outi=0 maxt=-5e-8 ic="rand(0,0.2,2)"
 
 check: heat check/check_soln_final.curve
 	cat check/check_soln_final.curve
