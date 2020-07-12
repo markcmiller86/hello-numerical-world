@@ -3,8 +3,10 @@ PTOOL ?= visit
 RUNAME ?= heat_results
 RM = rm
 
+HDR = Double.H
 SRC = heat.C utils.C args.C exact.C ftcs.C upwind15.C crankn.C
 OBJ = $(SRC:.C=.o)
+GCOV = $(SRC:.C=.C.gcov) $(SRC:.C=.gcda) $(SRC:.C=.gcno) $(HDR:.H=.H.gcov)
 EXE = heat
 
 # Implicit rule for object files
@@ -19,7 +21,7 @@ check_clean:
 	$(RM) -rf check check_crankn check_upwind15
 
 clean: check_clean
-	$(RM) $(OBJ) $(EXE)
+	$(RM) -f $(OBJ) $(EXE) $(GCOV)
 
 plot:
 	@./tools/run_$(PTOOL).sh $(RUNAME)

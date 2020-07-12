@@ -4,25 +4,7 @@ compiler:
   - gcc
 
 script:
-  - wget -O - https://codecov.io/gh/markcmiller86/hello-numerical-world 2>/dev/null | grep -A 25 'Project Totals' | grep -e '^[0-9\.]*%' | tr -d '\.%' > old_coverage.txt
-  - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check
-  - gcov -a heat
-  - bash <(curl -s https://codecov.io/bash) -v -Z
-  - cp old_coverage.txt new_coverage.txt
-  - cat old_coverage.txt
-  - |
-    i=0
-    while [[ $(cat old_coverage.txt) -lt 10000 && $(cat old_coverage.txt) -eq $(cat new_coverage.txt) && $i -lt 10 ]]
-    do
-        cat old_coverage.txt
-        cat new_coverage.txt
-        echo "Checking if coverage has improved [attempt $i of 10]"
-        sleep 15
-        i=$(expr $i + 1)
-        wget -O - https://codecov.io/gh/markcmiller86/hello-numerical-world 2>/dev/null | grep -A 25 'Project Totals' | grep -e '^[0-9\.]*%' | tr -d '\.%' > new_coverage.txt
-    done
-    if [[ $(cat new_coverage.txt) -ge $(cat old_coverage.txt) ]]; then
-        exit 0
-    else
-        exit 1
-    fi
+  - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check_all
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

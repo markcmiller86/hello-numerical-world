@@ -2,3 +2,11 @@ codecov:
   require_ci_to_pass: no
   notify:
     wait_for_ci: no
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 0%
+        base: auto
