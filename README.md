@@ -1,6 +1,6 @@
 # Hello Numerical World
 
-**NOTE:** This repository is importanted from [here](https://github.com/markcmiller86/hello-numerical-world.git)
+**NOTE:** This repository is imported from [here](https://github.com/markcmiller86/hello-numerical-world.git)
 
 In this repo is a very simple implementation of an application for solving the one dimensional
 heat conduction equation. This is the functional equivalent of a *Hello World* application for
