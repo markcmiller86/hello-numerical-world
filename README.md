@@ -1,10 +1,10 @@
 # Hello Numerical World
 
-[![Build Status](https://travis-ci.com/markcmiller86/hello-numerical-world.svg?branch=main)](https://travis-ci.com/markcmiller86/hello-numerical-world) [![codecov](https://codecov.io/gh/markcmiller86/hello-numerical-world/branch/main/graph/badge.svg)](https://codecov.io/gh/markcmiller86/hello-numerical-world)
+**NOTE:** This repository is importanted from [here](https://github.com/markcmiller86/hello-numerical-world.git)
 
 In this repo is a very simple implementation of an application for solving the one dimensional
 heat conduction equation. This is the functional equivalent of a *Hello World* application for
-HPC/CSE numerical programmers.
+HPC/CSE numerical software developers.
 
 In general, heat [conduction](https://en.wikipedia.org/wiki/Thermal_conduction) is governed
 by the partial differential (PDE)...
