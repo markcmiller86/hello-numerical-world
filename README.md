@@ -45,3 +45,4 @@ with higher spatial order than FTCS.
 
 The technical details are described more fully in this [ATPESC](https://extremecomputingtraining.anl.gov)
 [Hands-On Lesson](https://xsdk-project.github.io/MathPackagesTraining2020/lessons/hand_coded_heat/)
+
