@@ -4,7 +4,7 @@
 // Modified: 30 May 2009 Author: John Burkardt
 // Modified by Mark C. Miller, July 23, 2017
 static void
-r83_np_fa(int n, Double *a)
+r83_np_fa(int n, Number *a)
 {
     int i;
 
@@ -24,14 +24,14 @@ r83_np_fa(int n, Double *a)
 
 void
 initialize_crankn(int n,
-    Double alpha, Double dx, Double dt,
-    Double **_cn_Amat)
+    Number alpha, Number dx, Number dt,
+    Number **_cn_Amat)
 {
     int i;
-    Double const w = alpha * dt / dx / dx;
+    Number const w = alpha * dt / dx / dx;
 
     // Build a tri-diagonal matrix
-    Double *cn_Amat = new Double[3*n]();
+    Number *cn_Amat = new Number[3*n]();
 
     cn_Amat[0+0*3] = 0.0;
     cn_Amat[1+0*3] = 1.0;
@@ -59,7 +59,7 @@ initialize_crankn(int n,
 // Modified: 30 May 2009 Author: John Burkardt
 // Modified by Mark C. Miller, miller86@llnl.gov, July 23, 2017
 static void 
-r83_np_sl ( int n, Double const *a_lu, Double const *b, Double *x)
+r83_np_sl ( int n, Number const *a_lu, Number const *b, Number *x)
 {
     int i;
 
@@ -81,9 +81,9 @@ r83_np_sl ( int n, Double const *a_lu, Double const *b, Double *x)
 
 bool
 update_solution_crankn(int n,
-    Double *curr, Double const *last,
-    Double const *cn_Amat,
-    Double bc_0, Double bc_1)
+    Number *curr, Number const *last,
+    Number const *cn_Amat,
+    Number bc_0, Number bc_1)
 {
     // Do the solve
     r83_np_sl (n, cn_Amat, last, curr);

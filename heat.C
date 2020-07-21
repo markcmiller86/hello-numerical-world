@@ -1,10 +1,10 @@
 #include "heat.H"
 
-// Double class' statics
-int         Double::nadds  = 0;
-int         Double::nmults = 0;
-int         Double::ndivs  = 0;
-std::size_t Double::nbytes = 0;
+// Number class' statics
+int         Number::nadds  = 0;
+int         Number::nmults = 0;
+int         Number::ndivs  = 0;
+std::size_t Number::nbytes = 0;
 
 // Command-line argument variables
 int noout        = 0;
@@ -15,69 +15,69 @@ char const *runame = "heat_results";
 char const *alg  = "ftcs";
 char const *prec = "double";
 char const *ic   = "const(1)";
-Double lenx      = 1.0;
-Double alpha     = 0.2;
-Double dt        = 0.004;
-Double dx        = 0.1;
-Double bc0       = 0;
-Double bc1       = 1;
-Double maxt      = 2.0;
-Double min_change = 1e-8*1e-8;
+Number lenx      = 1.0;
+Number alpha     = 0.2;
+Number dt        = 0.004;
+Number dx        = 0.1;
+Number bc0       = 0;
+Number bc1       = 1;
+Number maxt      = 2.0;
+Number min_change = 1e-8*1e-8;
 
 // Various arrays of numerical data
-Double *curr           = 0; // current solution
-Double *last           = 0; // last solution
-Double *exact          = 0; // exact solution (when available)
-Double *change_history = 0; // solution l2norm change history
-Double *error_history  = 0; // solution error history (when available)
-Double *cn_Amat        = 0; // A matrix for Crank-Nicholson
+Number *curr           = 0; // current solution
+Number *last           = 0; // last solution
+Number *exact          = 0; // exact solution (when available)
+Number *change_history = 0; // solution l2norm change history
+Number *error_history  = 0; // solution error history (when available)
+Number *cn_Amat        = 0; // A matrix for Crank-Nicholson
 
 // Number of points in space, x, and time, t.
 int Nx = (int) (lenx/dx);
 int Nt = (int) (maxt/dt);
 
 // Utilities
-extern Double
-l2_norm(int n, Double const *a, Double const *b);
+extern Number
+l2_norm(int n, Number const *a, Number const *b);
 
 extern void
-copy(int n, Double *dst, Double const *src);
+copy(int n, Number *dst, Number const *src);
 
 extern void
-write_array(int t, int n, Double dx, Double const *a);
+write_array(int t, int n, Number dx, Number const *a);
 
 extern void
-set_initial_condition(int n, Double *a, Double dx, char const *ic);
+set_initial_condition(int n, Number *a, Number dx, char const *ic);
 
 extern void
 initialize_crankn(int n,
-    Double alpha, Double dx, Double dt,
-    Double **_cn_Amat);
+    Number alpha, Number dx, Number dt,
+    Number **_cn_Amat);
 
 extern void
 process_args(int argc, char **argv);
 
 extern void 
-compute_exact_solution(int n, Double *a, Double dx, char const *ic,
-    Double alpha, Double t, Double bc0, Double bc1);
+compute_exact_solution(int n, Number *a, Number dx, char const *ic,
+    Number alpha, Number t, Number bc0, Number bc1);
 
 extern bool
 update_solution_ftcs(int n,
-    Double *curr, Double const *last,
-    Double alpha, Double dx, Double dt,
-    Double bc_0, Double bc_1);
+    Number *curr, Number const *last,
+    Number alpha, Number dx, Number dt,
+    Number bc_0, Number bc_1);
 
 extern bool
 update_solution_upwind15(int n,
-    Double *curr, Double const *last,
-    Double alpha, Double dx, Double dt,
-    Double bc_0, Double bc_1);
+    Number *curr, Number const *last,
+    Number alpha, Number dx, Number dt,
+    Number bc_0, Number bc_1);
 
 extern bool
 update_solution_crankn(int n,
-    Double *curr, Double const *last,
-    Double const *cn_Amat,
-    Double bc_0, Double bc_1);
+    Number *curr, Number const *last,
+    Number const *cn_Amat,
+    Number bc_0, Number bc_1);
 
 static void
 initialize(void)
@@ -86,13 +86,13 @@ initialize(void)
     Nt = (int) (maxt/dt);
     dx = lenx/(Nx-1);
 
-    curr = new Double[Nx]();
-    last = new Double[Nx]();
+    curr = new Number[Nx]();
+    last = new Number[Nx]();
     if (save)
     {
-        exact = new Double[Nx]();
-        change_history = new Double[Nx]();
-        error_history = new Double[Nx]();
+        exact = new Number[Nx]();
+        change_history = new Number[Nx]();
+        error_history = new Number[Nx]();
     }
 
     assert(strncmp(alg, "ftcs", 4)==0 ||
@@ -110,7 +110,7 @@ initialize(void)
     set_initial_condition(Nx, last, dx, ic);
 }
 
-int finalize(int ti, Double maxt, Double change)
+int finalize(int ti, Number maxt, Number change)
 {
     int retval = 0;
 
@@ -123,8 +123,8 @@ int finalize(int ti, Double maxt, Double change)
 
     if (outi)
     {
-        printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
-        printf("Counts: %s\n", Double::counts_string());
+        printf("Iteration %04d: last change l2=%g\n", ti, (fpnumber) change);
+        printf("Counts: %s\n", Number::counts_string());
     }
 
     delete [] curr;
@@ -152,10 +152,10 @@ update_solution()
     return false;
 }
 
-static Double
+static Number
 update_output_files(int ti)
 {
-    Double change;
+    Number change;
 
     if (ti>0 && save)
     {
@@ -180,7 +180,7 @@ update_output_files(int ti)
 int main(int argc, char **argv)
 {
     int ti;
-    Double change;
+    Number change;
 
     // Read command-line args and set values
     process_args(argc, argv);
@@ -205,13 +205,13 @@ int main(int argc, char **argv)
         if (maxt == INT_MAX && change < min_change)
         {
             printf("Stopped after %06d iterations for threshold %g\n",
-                ti, (double) change);
+                ti, (fpnumber) change);
             break;
         }
 
         // Output progress
         if (outi && ti%outi==0)
-            printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
+            printf("Iteration %04d: last change l2=%g\n", ti, (fpnumber) change);
 
         // Copy current solution to last
         copy(Nx, last, curr);

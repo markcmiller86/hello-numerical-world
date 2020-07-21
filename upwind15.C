@@ -1,15 +1,15 @@
 #include "heat.H"
 
 bool
-update_solution_upwind15(int n, Double *curr, Double const *last,
-    Double alpha, Double dx, Double dt,
-    Double bc_0, Double bc_1)
+update_solution_upwind15(int n, Number *curr, Number const *last,
+    Number alpha, Number dx, Number dt,
+    Number bc_0, Number bc_1)
 {
-    Double const f2 = 1.0/24;
-    Double const f1 = 1.0/6;
-    Double const f0 = 1.0/4;
-    Double const k = alpha * alpha * dt / (dx * dx);
-    Double const k2 = k*k;
+    Number const f2 = 1.0/24;
+    Number const f1 = 1.0/6;
+    Number const f0 = 1.0/4;
+    Number const k = alpha * alpha * dt / (dx * dx);
+    Number const k2 = k*k;
 
     int i;
     curr[0  ] = bc_0;

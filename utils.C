@@ -1,26 +1,26 @@
 #include "heat.H"
 
 extern int Nx;
-extern Double *exact;
+extern Number *exact;
 extern char const *runame;
 extern int noout;
 
 // Utilities
-Double
-l2_norm(int n, Double const *a, Double const *b)
+Number
+l2_norm(int n, Number const *a, Number const *b)
 {
     int i;
-    Double sum = 0;
+    Number sum = 0;
     for (i = 0; i < n; i++)
     {
-        Double diff = a[i] - b[i];
+        Number diff = a[i] - b[i];
         sum += diff * diff;
     }
     return sum / n;
 }
 
 void
-copy(int n, Double *dst, Double const *src)
+copy(int n, Number *dst, Number const *src)
 {
     int i;
     for (i = 0; i < n; i++)
@@ -28,7 +28,7 @@ copy(int n, Double *dst, Double const *src)
 }
 
 void
-write_array(int t, int n, Double dx, Double const *a)
+write_array(int t, int n, Number dx, Number const *a)
 {
     int i;
     char fname[128];
@@ -80,10 +80,10 @@ write_array(int t, int n, Double dx, Double const *a)
 }
 
 void
-set_initial_condition(int n, Double *a, Double dx, char const *ic)
+set_initial_condition(int n, Number *a, Number dx, char const *ic)
 {
     int i;
-    Double x;
+    Number x;
 
     if (!strncmp(ic, "const(", 6)) /* const(val) */
     {

@@ -16,4 +16,7 @@
 
 #include <sstream>
 
-#include "Double.H"
+// Lets overlook the fact that we're including one
+// header inside of another just for convenience
+#include "Number.H"
+#include "Half.H"

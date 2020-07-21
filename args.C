@@ -20,7 +20,7 @@ static char clargs[2048];
             if      (style[1] == 'd') /* int */ \
                 *((int*) valp) = (int) strtol(argv[i]+len,0,10); \
             else if (style[1] == 'g') /* double */ \
-                *((Double*) valp) = (double) strtod(argv[i]+len,0); \
+                *((Number*) valp) = (fpnumber) strtod(argv[i]+len,0); \
             else if (style[1] == 's') /* char* */ \
                 *((char**) valp) = (char*) strdup(argv[i]+len); \
         }\
@@ -46,14 +46,14 @@ static char clargs[2048];
     } \
 }
 
-extern Double alpha;
-extern Double lenx;
-extern Double dx;
-extern Double dt;
-extern Double maxt;
-extern Double bc0;
-extern Double bc1;
-extern Double min_change;
+extern Number alpha;
+extern Number lenx;
+extern Number dx;
+extern Number dt;
+extern Number maxt;
+extern Number bc0;
+extern Number bc1;
+extern Number min_change;
 extern char const *runame;
 extern char const *prec;
 extern char const *ic;
@@ -79,13 +79,13 @@ process_args(int argc, char **argv)
 
     HANDLE_ARG(runame, char*, %s, name to give run and results dir);
     HANDLE_ARG(prec, char*, %s, precision half|float|double|quad);
-    HANDLE_ARG(alpha, double, %g, material thermal diffusivity (sq-meters/second));
-    HANDLE_ARG(lenx, double, %g, material length (meters));
-    HANDLE_ARG(dx, double, %g, x-incriment. Best if lenx/dx==int. (meters));
-    HANDLE_ARG(dt, double, %g, t-incriment (seconds));
-    HANDLE_ARG(maxt, double, %g, >0:max sim time (seconds) | <0:min l2 change in soln);
-    HANDLE_ARG(bc0, double, %g, boundary condition @ x=0: u(0,t) (Kelvin));
-    HANDLE_ARG(bc1, double, %g, boundary condition @ x=lenx: u(lenx,t) (Kelvin));
+    HANDLE_ARG(alpha, fpnumber, %g, material thermal diffusivity (sq-meters/second));
+    HANDLE_ARG(lenx, fpnumber, %g, material length (meters));
+    HANDLE_ARG(dx, fpnumber, %g, x-incriment. Best if lenx/dx==int. (meters));
+    HANDLE_ARG(dt, fpnumber, %g, t-incriment (seconds));
+    HANDLE_ARG(maxt, fpnumber, %g, >0:max sim time (seconds) | <0:min l2 change in soln);
+    HANDLE_ARG(bc0, fpnumber, %g, boundary condition @ x=0: u(0,t) (Kelvin));
+    HANDLE_ARG(bc1, fpnumber, %g, boundary condition @ x=lenx: u(lenx,t) (Kelvin));
     HANDLE_ARG(ic, char*, %s, initial condition @ t=0: u(x,0) (Kelvin));
     HANDLE_ARG(alg, char*, %s, algorithm ftcs|upwind15|crankn);
     HANDLE_ARG(savi, int, %d, save every i-th solution step);

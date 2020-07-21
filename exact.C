@@ -1,11 +1,11 @@
 #include "heat.H"
 
 void 
-compute_exact_solution(int n, Double *a, Double dx, char const *ic,
-    Double alpha, Double t, Double bc0, Double bc1)
+compute_exact_solution(int n, Number *a, Number dx, char const *ic,
+    Number alpha, Number t, Number bc0, Number bc1)
 {
     int i;
-    Double x;
+    Number x;
     
     // For any time t for Sin(Pi*x) initial condition
     // and zero boundary condition
@@ -18,17 +18,17 @@ compute_exact_solution(int n, Double *a, Double dx, char const *ic,
     // and zero boundary condition
     else if (bc0 == 0 && bc1 == 0 && !strncmp(ic, "const(", 6))
     {
-        Double cval = strtod(ic+6, 0);
+        Number cval = strtod(ic+6, 0);
         for (i = 0, x = 0; i < n; i++, x+=dx)
         {
             int n;
-            Double fsum = 0;
+            Number fsum = 0;
 
             // Brute force sum first 1000 terms of Fourier series
             for (n = 1; n < 1000; n++)
             {
-                Double coeff = 2*cval*(1-pow(-1.0,(double)n))/(n*M_PI);
-                Double func = sin(n*M_PI*x)*exp(((double)-alpha)*n*n*M_PI*M_PI*((double)t));
+                Number coeff = 2*cval*(1-pow(-1.0,(fpnumber)n))/(n*M_PI);
+                Number func = sin(n*M_PI*x)*exp(((fpnumber)-alpha)*n*n*M_PI*M_PI*((fpnumber)t));
                 fsum += coeff * func;
             }
             a[i] = fsum;
