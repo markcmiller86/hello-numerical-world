@@ -83,7 +83,7 @@ void
 set_initial_condition(int n, Number *a, Number dx, char const *ic)
 {
     int i;
-    Number x;
+    double x;
 
     if (!strncmp(ic, "const(", 6)) /* const(val) */
     {

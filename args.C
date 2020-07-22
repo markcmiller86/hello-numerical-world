@@ -62,6 +62,7 @@ extern int savi;
 extern int save;
 extern int outi;
 extern int noout;
+int fptype = FPTYPE;
 
 void
 process_args(int argc, char **argv)
@@ -92,6 +93,7 @@ process_args(int argc, char **argv)
     HANDLE_ARG(save, int, %d, save error in every saved solution);
     HANDLE_ARG(outi, int, %d, output progress every i-th solution step);
     HANDLE_ARG(noout, int, %d, disable all file outputs);
+    HANDLE_ARG(fptype, int, %d, precision 0/1/2/3 ==> half/float/double/quad)
 
     if (help)
     {

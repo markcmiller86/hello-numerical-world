@@ -15,14 +15,14 @@ char const *runame = "heat_results";
 char const *alg  = "ftcs";
 char const *prec = "double";
 char const *ic   = "const(1)";
-Number lenx      = 1.0;
-Number alpha     = 0.2;
-Number dt        = 0.004;
-Number dx        = 0.1;
-Number bc0       = 0;
-Number bc1       = 1;
-Number maxt      = 2.0;
-Number min_change = 1e-8*1e-8;
+Number lenx      = Number(1.0);
+Number alpha     = Number(0.2);
+Number dt        = Number(0.004);
+Number dx        = Number(0.1);
+Number bc0       = Number(0.0);
+Number bc1       = Number(1.0);
+Number maxt      = Number(2.0);
+Number min_change = Number(1e-8*1e-8);
 
 // Various arrays of numerical data
 Number *curr           = 0; // current solution
@@ -123,7 +123,7 @@ int finalize(int ti, Number maxt, Number change)
 
     if (outi)
     {
-        printf("Iteration %04d: last change l2=%g\n", ti, (fpnumber) change);
+        printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
         printf("Counts: %s\n", Number::counts_string());
     }
 
@@ -205,13 +205,13 @@ int main(int argc, char **argv)
         if (maxt == INT_MAX && change < min_change)
         {
             printf("Stopped after %06d iterations for threshold %g\n",
-                ti, (fpnumber) change);
+                ti, (double) change);
             break;
         }
 
         // Output progress
         if (outi && ti%outi==0)
-            printf("Iteration %04d: last change l2=%g\n", ti, (fpnumber) change);
+            printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
 
         // Copy current solution to last
         copy(Nx, last, curr);

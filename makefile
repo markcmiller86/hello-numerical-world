@@ -3,7 +3,7 @@ PTOOL ?= visit
 RUNAME ?= heat_results
 RM = rm
 
-HDR = Double.H
+HDR = Number.H
 SRC = heat.C utils.C args.C exact.C ftcs.C upwind15.C crankn.C
 OBJ = $(SRC:.C=.o)
 GCOV = $(SRC:.C=.C.gcov) $(SRC:.C=.gcda) $(SRC:.C=.gcno) $(HDR:.H=.H.gcov)
@@ -17,14 +17,18 @@ EXE = heat
 heat: $(OBJ)
 	$(CXX) -o heat $(OBJ) $(LDFLAGS) -lm
 
+# All objects depend on header
+$(OBJ): $(HDR)
+
+# convenient target to plot results
+plot:
+	@./tools/run_$(PTOOL).sh $(RUNAME)
+
 check_clean:
 	$(RM) -rf check check_crankn check_upwind15
 
 clean: check_clean
 	$(RM) -f $(OBJ) $(EXE) $(GCOV)
-
-plot:
-	@./tools/run_$(PTOOL).sh $(RUNAME)
 
 #
 # Run for a long time with random initial condition
