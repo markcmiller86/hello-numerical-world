@@ -35,16 +35,16 @@ clean: check_clean
 # and confirm linear stead-state upon termination
 #
 check/check_soln_final.curve:
-	./heat runame=check outi=0 maxt=-5e-8 ic="rand(0,0.2,2)"
+	./heat runame=check outi=0 maxt=10 ic="rand(0,0.2,2)"
 
 check: heat check/check_soln_final.curve
 	cat check/check_soln_final.curve
-	./check.sh check/check_soln_final.curve 0
+	./check.sh check/check_soln_final.curve 1e-2 
 
 check_ftcs: check
 
 check_crankn/check_crankn_soln_final.curve:
-	./heat alg=crankn runame=check_crankn outi=0 maxt=-5e-8 ic="rand(0,0.2,2)"
+	./heat alg=crankn runame=check_crankn outi=0 maxt=10 ic="rand(0,0.2,2)"
 
 check_crankn: heat check_crankn/check_crankn_soln_final.curve
 	cat check_crankn/check_crankn_soln_final.curve

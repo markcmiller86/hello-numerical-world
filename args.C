@@ -55,14 +55,13 @@ extern Number bc0;
 extern Number bc1;
 extern Number min_change;
 extern char const *runame;
-extern char const *prec;
 extern char const *ic;
 extern char const *alg;
 extern int savi;
 extern int save;
 extern int outi;
 extern int noout;
-int fptype = FPTYPE;
+int const prec = FPTYPE;
 
 void
 process_args(int argc, char **argv)
@@ -79,7 +78,6 @@ process_args(int argc, char **argv)
         fprintf(stderr, "Usage: ./heat <arg>=<value> <arg>=<value>...\n");
 
     HANDLE_ARG(runame, char*, %s, name to give run and results dir);
-    HANDLE_ARG(prec, char*, %s, precision half|float|double|quad);
     HANDLE_ARG(alpha, fpnumber, %g, material thermal diffusivity (sq-meters/second));
     HANDLE_ARG(lenx, fpnumber, %g, material length (meters));
     HANDLE_ARG(dx, fpnumber, %g, x-incriment. Best if lenx/dx==int. (meters));
@@ -93,7 +91,7 @@ process_args(int argc, char **argv)
     HANDLE_ARG(save, int, %d, save error in every saved solution);
     HANDLE_ARG(outi, int, %d, output progress every i-th solution step);
     HANDLE_ARG(noout, int, %d, disable all file outputs);
-    HANDLE_ARG(fptype, int, %d, precision 0/1/2/3 ==> half/float/double/quad)
+    HANDLE_ARG(prec, int const, %d, precision 0=half/1=float/2=double/3=long double)
 
     if (help)
     {

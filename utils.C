@@ -75,7 +75,13 @@ write_array(int t, int n, Number dx, Number const *a)
     outf = fopen(fname,"w");
     fprintf(outf, "# %s\n", vname);
     for (i = 0; i < n; i++)
-        fprintf(outf, "%8.4g %8.4g\n", i*((double)dx), (double) a[i]);
+        switch (FPTYPE)
+        {
+            case 0: fprintf(outf, "%4.2g %4.2g\n", i*((double)dx), (double) a[i]); break;
+            case 1: fprintf(outf, "%8.4g %8.4g\n", i*((double)dx), (double) a[i]); break;
+            case 2: fprintf(outf, "%12.6g %12.6g\n", i*((double)dx), (double) a[i]); break;
+            case 3: fprintf(outf, "%16.8g %16.8g\n", i*((double)dx), (double) a[i]); break;
+        }
     fclose(outf);
 }
 
