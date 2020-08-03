@@ -75,7 +75,7 @@ process_args(int argc, char **argv)
         help = 0!=strcasestr(argv[i], "help");
     
     if (help)
-        fprintf(stderr, "Usage: ./heat <arg>=<value> <arg>=<value>...\n");
+        fprintf(stderr, "Usage: %s <arg>=<value> <arg>=<value>...\n", argv[0]);
 
     HANDLE_ARG(runame, char*, %s, name to give run and results dir);
     HANDLE_ARG(alpha, fpnumber, %g, material thermal diffusivity (sq-meters/second));
@@ -96,8 +96,8 @@ process_args(int argc, char **argv)
     if (help)
     {
         fprintf(stderr, "Examples...\n");
-        fprintf(stderr, "    ./heat dx=0.01 dt=0.0002 alg=ftcs\n");
-        fprintf(stderr, "    ./heat dx=0.1 bc0=273 bc1=273 ic=\"spikes(273,5,373)\"\n");
+        fprintf(stderr, "    %s dx=0.01 dt=0.0002 alg=ftcs\n", argv[0]);
+        fprintf(stderr, "    %s dx=0.1 bc0=273 bc1=273 ic=\"spikes(273,5,373)\"\n", argv[0]);
         exit(1);
     }
 

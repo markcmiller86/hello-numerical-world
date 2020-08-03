@@ -13,6 +13,18 @@ EXE = heat
 %.o : %.C
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
 
+# Help is default target
+help:
+	@echo "Targets:"
+	@echo "    heat: makes the default heat application (double precision)"
+	@echo "    heat-half: makes the heat application with half precision" 
+	@echo "    heat-single: makes the heat application with single precision" 
+	@echo "    heat-double: makes the heat application with double precision" 
+	@echo "    heat-long-double: makes the heat application with long-double precision" 
+	@echo "    PTOOL=[gnuplot,matplotlib,visit] RUNAME=<run-dir-name> plot: plots results"
+	@echo "    check: runs various tests confirming steady-state is linear"
+
+
 # Linking the final heat app
 heat: $(OBJ)
 	$(CXX) -o heat $(OBJ) $(LDFLAGS) -lm
@@ -20,12 +32,38 @@ heat: $(OBJ)
 # All objects depend on header
 $(OBJ): $(HDR)
 
+# Convenience variable/target for half-precision
+heat-half : CPPFLAGS=-DFPTYPE=0
+heat-half : $(OBJ)
+heat-half: heat
+	mv heat heat-half
+
+# Convenience variable/target for single-precision
+heat-single: CPPFLAGS=-DFPTYPE=1
+heat-single: $(OBJ)
+heat-single: heat
+	mv heat heat-single
+
+# Convenience variable/target for double-precision
+# Same as default
+heat-double: CPPFLAGS=-DFPTYPE=2
+heat-double: $(OBJ)
+heat-double: heat
+	mv heat heat-double
+
+# Convenience variable/target for long-double-precision
+heat-long-double: CPPFLAGS=-DFPTYPE=3
+heat-long-double: $(OBJ)
+heat-long-double: heat
+	mv heat heat-long-double
+
 # convenient target to plot results
 plot:
 	@./tools/run_$(PTOOL).sh $(RUNAME)
 
 check_clean:
 	$(RM) -rf check check_crankn check_upwind15
+	$(RM) -rf heat heat-half heat-single heat-double heat-long-double
 
 clean: check_clean
 	$(RM) -f $(OBJ) $(EXE) $(GCOV)
@@ -38,7 +76,10 @@ check/check_soln_final.curve:
 	./heat runame=check outi=0 maxt=10 ic="rand(0,0.2,2)"
 
 check: heat check/check_soln_final.curve
-	cat check/check_soln_final.curve
+	@echo "Time zero..."
+	@cat check/check_soln_00000.curve
+	@echo "Final result..."
+	@cat check/check_soln_final.curve
 	./check.sh check/check_soln_final.curve 1e-2 
 
 check_ftcs: check
