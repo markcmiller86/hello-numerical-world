@@ -1,13 +1,10 @@
 # Hello Numerical World
 
-**NOTE:** This repository is imported from [here](https://github.com/markcmiller86/hello-numerical-world.git)
-
-In this repo is a very simple implementation of an application for solving the one dimensional
-heat conduction equation. This is the functional equivalent of a *Hello World* application for
-HPC/CSE numerical software developers.
+This is an implementation of an application for solving one dimensional heat conduction
+problems. It is the functional equivalent of a *Hello World* application for HPC/CSE.
 
 In general, heat [conduction](https://en.wikipedia.org/wiki/Thermal_conduction) is governed
-by the partial differential (PDE)...
+by the partial differential ([PDE](https://en.wikipedia.org/wiki/Partial_differential_equation))...
 
 | | |
 |:---:|:---:|
@@ -15,19 +12,19 @@ by the partial differential (PDE)...
 
 where _u_ is the temperature at spatial positions, _x_, and times, _t_,
 ![](http://latex.codecogs.com/gif.latex?%5Calpha) is the _thermal diffusivity_
-of the homogeneous material through which heat is flowing. This partial differential equation (PDE)
+of the homogeneous material through which heat is flowing. This PDE
 is known as the _Diffusion Equation_ and also the [_Heat Equation_](https://en.wikipedia.org/wiki/Heat_equation).
 
 ### Simplifying Assumptions
 
-To make the problem tractable for this lesson, we make some simplifying assumptions...
+Our implemenation makes some simplifying assumptions...
 
 1. The thermal diffusivity, ![](http://latex.codecogs.com/gif.latex?%5Calpha),
    is constant for all _space_ and _time_.
 1. The only heat _source_ is from the initial and/or boundary conditions.
 1. We will deal only with the _one dimensional_ problem in _Cartesian coordinates_.
 
-In this case, the PDE our application needs to solve simplifies to...
+In this case, the PDE simplifies to...
 
 | | |
 |:---:|:---:|
@@ -43,5 +40,5 @@ an [implicit](https://en.wikipedia.org/wiki/Explicit_and_implicit_methods) metho
 [explicit](https://en.wikipedia.org/wiki/Explicit_and_implicit_methods) method
 with higher spatial order than FTCS.
 
-The technical details are described more fully in this [ATPESC](https://extremecomputingtraining.anl.gov)
+Details are described more fully in this [ATPESC](https://extremecomputingtraining.anl.gov)
 [Hands-On Lesson](https://xsdk-project.github.io/MathPackagesTraining2020/lessons/hand_coded_heat/)
