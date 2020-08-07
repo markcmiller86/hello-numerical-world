@@ -103,7 +103,6 @@ initialize(void)
     }
 
     assert(strncmp(alg, "ftcs", 4)==0 ||
-           strncmp(alg, "upwind15", 8)==0 ||
            strncmp(alg, "dufrank", 7)==0 ||
            strncmp(alg, "crankn", 6)==0);
 
@@ -157,8 +156,6 @@ update_solution()
 {
     if (!strcmp(alg, "ftcs"))
         return update_solution_ftcs(Nx, curr, back1, alpha, dx, dt, bc0, bc1);
-    else if (!strcmp(alg, "upwind15"))
-        return update_solution_upwind15(Nx, curr, back1, alpha, dx, dt, bc0, bc1);
     else if (!strcmp(alg, "crankn"))
         return update_solution_crankn(Nx, curr, back1, cn_Amat, bc0, bc1);
     else if (!strcmp(alg, "dufrank"))

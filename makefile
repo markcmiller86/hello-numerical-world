@@ -63,7 +63,7 @@ plot:
 	@./tools/run_$(PTOOL).sh $(RUNAME)
 
 check_clean:
-	$(RM) -rf check check_crankn check_upwind15
+	$(RM) -rf check check_crankn check_dufrank
 	$(RM) -rf heat heat-half heat-single heat-double heat-long-double
 
 clean: check_clean
@@ -92,11 +92,11 @@ check_crankn: heat check_crankn/check_crankn_soln_final.curve
 	cat check_crankn/check_crankn_soln_final.curve
 	./check_lss.sh check_crankn/check_crankn_soln_final.curve $(ERRBND)
 
-check_upwind15/check_upwind15_soln_final.curve:
-	./heat alg=upwind15 runame=check_upwind15 outi=0 maxt=40 ic="rand(0,0.2,2)"
+check_dufrank/check_dufrank_soln_final.curve:
+	./heat alg=dufrank runame=check_dufrank outi=0 maxt=40 ic="rand(0,0.2,2)"
 
-check_upwind15: heat check_upwind15/check_upwind15_soln_final.curve
-	cat check_upwind15/check_upwind15_soln_final.curve
-	./check_lss.sh check_upwind15/check_upwind15_soln_final.curve $(ERRBND)
+check_dufrank: heat check_dufrank/check_dufrank_soln_final.curve
+	cat check_dufrank/check_dufrank_soln_final.curve
+	./check_lss.sh check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
 
-check_all: check_ftcs check_crankn check_upwind15
+check_all: check_ftcs check_crankn check_dufrank

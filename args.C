@@ -86,7 +86,7 @@ process_args(int argc, char **argv)
     HANDLE_ARG(bc0, fpnumber, %g, boundary condition @ x=0: u(0,t) (Kelvin));
     HANDLE_ARG(bc1, fpnumber, %g, boundary condition @ x=lenx: u(lenx,t) (Kelvin));
     HANDLE_ARG(ic, char*, %s, initial condition @ t=0: u(x,0) (Kelvin));
-    HANDLE_ARG(alg, char*, %s, algorithm ftcs|upwind15|crankn);
+    HANDLE_ARG(alg, char*, %s, algorithm ftcs|dufrank|crankn);
     HANDLE_ARG(savi, int, %d, save every i-th solution step);
     HANDLE_ARG(save, int, %d, save error in every saved solution);
     HANDLE_ARG(outi, int, %d, output progress every i-th solution step);
