@@ -1,4 +1,5 @@
 # ./heat alpha=8.2e-10 lenx=0.25 dx=0.01 dt=100 maxt=5580000 outi=100 savi=1000 bc0=233.15 bc1=294.261 ic="const(294.261)"
+ERRBND ?= 1e-6
 PTOOL ?= visit
 RUNAME ?= heat_results
 RM = rm
@@ -80,7 +81,7 @@ check: heat check/check_soln_final.curve
 	@cat check/check_soln_00000.curve
 	@echo "Final result..."
 	@cat check/check_soln_final.curve
-	./check.sh check/check_soln_final.curve 1e-2 
+	./check_lss.sh check/check_soln_final.curve $(ERRBND)
 
 check_ftcs: check
 
@@ -89,13 +90,13 @@ check_crankn/check_crankn_soln_final.curve:
 
 check_crankn: heat check_crankn/check_crankn_soln_final.curve
 	cat check_crankn/check_crankn_soln_final.curve
-	./check.sh check_crankn/check_crankn_soln_final.curve
+	./check_lss.sh check_crankn/check_crankn_soln_final.curve $(ERRBND)
 
 check_upwind15/check_upwind15_soln_final.curve:
 	./heat alg=upwind15 runame=check_upwind15 outi=0 maxt=40 ic="rand(0,0.2,2)"
 
 check_upwind15: heat check_upwind15/check_upwind15_soln_final.curve
 	cat check_upwind15/check_upwind15_soln_final.curve
-	./check.sh check_upwind15/check_upwind15_soln_final.curve
+	./check_lss.sh check_upwind15/check_upwind15_soln_final.curve $(ERRBND)
 
 check_all: check_ftcs check_crankn check_upwind15
