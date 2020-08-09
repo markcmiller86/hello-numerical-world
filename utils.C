@@ -77,13 +77,13 @@ write_array(int t, int n, Number dx, Number const *a)
     for (i = 0; i < n; i++)
     {
 #if FPTYPE == 0
-        fprintf(outf, "%-7.5g %-7.5g\n", double(i*dx), double(a[i]));
+        fprintf(outf, "%- 7.5e %- 7.5e\n", double(i*dx), double(a[i]));
 #elif FPTYPE == 1
-        fprintf(outf, "%-11.9g %-11.9g\n", i*dx, a[i]);
+        fprintf(outf, "%- 11.9e %- 11.9e\n", (double) (i*dx), (double) a[i]);
 #elif FPTYPE == 2
-        fprintf(outf, "%-19.17g %-19.17g\n", i*dx, a[i]);
+        fprintf(outf, "%- 19.17e %- 19.17e\n", (double) (i*dx), (double) a[i]);
 #elif FPTYPE == 3
-        fprintf(outf, "%-27.25Lg %-27.25Lg\n", (fpnumber) (i*dx), (fpnumber) a[i]);
+        fprintf(outf, "%- 27.25Le %- 27.25Le\n", (fpnumber) (i*dx), (fpnumber) a[i]);
 #elif 
 #error UNKNOWN FPTYPE
 #endif

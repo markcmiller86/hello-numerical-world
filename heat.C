@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "heat.H"
 
 // Number class' statics
@@ -13,7 +15,6 @@ int outi         = 100;
 int save         = 0;
 char const *runame = "heat_results";
 char const *alg  = "ftcs";
-char const *prec = "double";
 char const *ic   = "const(1)";
 Number lenx      = Number(1.0);
 Number alpha     = Number(0.2);
@@ -34,8 +35,8 @@ Number *error_history  = 0; // solution error history (when available)
 Number *cn_Amat        = 0; // A matrix for Crank-Nicholson
 
 // Number of points in space, x, and time, t.
-int Nx = (int) (lenx/dx);
-int Nt = (int) (maxt/dt);
+int Nx;
+int Nt;
 
 // Utilities
 extern Number
@@ -89,7 +90,7 @@ update_solution_dufrank(int n, Number *curr,
 static void
 initialize(void)
 {
-    Nx = (int) (lenx/dx)+1;
+    Nx = (int) round((double)(lenx/dx))+1;
     Nt = (int) (maxt/dt);
     dx = lenx/(Nx-1);
 
@@ -145,7 +146,6 @@ int finalize(int ti, Number maxt, Number change)
     if (error_history) delete [] error_history;
     if (cn_Amat) delete [] cn_Amat;
     if (strncmp(alg, "ftcs", 4)) free((void*)alg);
-    if (strncmp(prec, "double", 6)) free((void*)prec);
     if (strncmp(ic, "const(1)", 8)) free((void*)ic);
 
     return retval;
