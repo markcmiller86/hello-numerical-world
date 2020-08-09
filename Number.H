@@ -1,5 +1,6 @@
 #include <ostream>
-//using namespace std;
+
+#include "Half.H"
 
 #ifndef FPTYPE
 #define FPTYPE 2

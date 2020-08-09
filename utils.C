@@ -75,13 +75,19 @@ write_array(int t, int n, Number dx, Number const *a)
     outf = fopen(fname,"w");
     fprintf(outf, "# %s\n", vname);
     for (i = 0; i < n; i++)
-        switch (FPTYPE)
-        {
-            case 0: fprintf(outf, "%4.2g %4.2g\n", i*((double)dx), (double) a[i]); break;
-            case 1: fprintf(outf, "%8.4g %8.4g\n", i*((double)dx), (double) a[i]); break;
-            case 2: fprintf(outf, "%12.6g %12.6g\n", i*((double)dx), (double) a[i]); break;
-            case 3: fprintf(outf, "%16.8g %16.8g\n", i*((double)dx), (double) a[i]); break;
-        }
+    {
+#if FPTYPE == 0
+        fprintf(outf, "%-7.5g %-7.5g\n", double(i*dx), double(a[i]));
+#elif FPTYPE == 1
+        fprintf(outf, "%-11.9g %-11.9g\n", i*dx, a[i]);
+#elif FPTYPE == 2
+        fprintf(outf, "%-19.17g %-19.17g\n", i*dx, a[i]);
+#elif FPTYPE == 3
+        fprintf(outf, "%-27.25Lg %-27.25Lg\n", (fpnumber) (i*dx), (fpnumber) a[i]);
+#elif 
+#error UNKNOWN FPTYPE
+#endif
+    }
     fclose(outf);
 }
 

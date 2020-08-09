@@ -4,7 +4,7 @@ PTOOL ?= visit
 RUNAME ?= heat_results
 RM = rm
 
-HDR = Number.H
+HDR = Number.H Half.H
 SRC = heat.C utils.C args.C exact.C ftcs.C upwind15.C crankn.C dufrank.C
 OBJ = $(SRC:.C=.o)
 GCOV = $(SRC:.C=.C.gcov) $(SRC:.C=.gcda) $(SRC:.C=.gcno) $(HDR:.H=.H.gcov)
