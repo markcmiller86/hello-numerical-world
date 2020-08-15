@@ -1,5 +1,10 @@
 #include "heat.H"
 
+// Warning: In all likelihood, this is an incorrect algorithm
+// for *diffusion* terms. Upwind techniques are for advection
+// terms
+#error DO NOT USE
+
 bool
 update_solution_upwind15(int n, Number *curr, Number const *last,
     Number alpha, Number dx, Number dt,

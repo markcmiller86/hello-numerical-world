@@ -63,20 +63,23 @@ while IFS= read line; do
     yval=$(echo $line | tr -s ' ' | cut -d' ' -f2)
     if [[ "$xval" == "0" ]]; then
         t=$(perl -e "print abs($bc0-$yval)>($2)")
+        r=$(perl -e "print abs($bc0-$yval)")
         if [[ "$t" -eq 1 ]]; then
-            echo "Check failed at $xval $yval ($bc0)"
+            echo "Check failed at x=$xval y=$yval yexp=$bc0, diff=$r"
             exit 1
         fi
         continue
     fi
     exact_yval=$(perl -e "print $bc0 + ($bc1-$bc0)*$xval/$Len")
     if [[ $relerr -eq 1 ]]; then
-        diff=$(perl -e "print abs(($yval-$exact_yval)/$exact_yval)<=($errbnd)")
+        diffr=$(perl -e "print abs(($yval-$exact_yval)/$exact_yval)")
+        diffl=$(perl -e "print abs(($yval-$exact_yval)/$exact_yval)<=($errbnd)")
     else
-        diff=$(perl -e "print abs($yval-$exact_yval)<=($errbnd)")
+        diffr=$(perl -e "print abs($yval-$exact_yval)")
+        diffl=$(perl -e "print abs($yval-$exact_yval)<=($errbnd)")
     fi
-    if [[ $diff -ne 1 ]]; then
-        echo "Check failed at $xval $yval ($exact_yval)"
+    if [[ $diffl -ne 1 ]]; then
+        echo "Check failed at x=$xval y=$yval yexp=$exact_yval, diff=$diffr"
         exit 1
     fi
 done < $rdfile
