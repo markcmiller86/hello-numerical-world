@@ -19,9 +19,9 @@ typedef long double fpnumber;
 #error UNRECOGNIZED FPTYPE
 #endif
 
-// Encapsulate a double so we can easily count operations of interest
+// Encapsulate a floating point number to easily track various metrics.
 // Note: Doing this well is complicated by the mix of types in numerical
-// statements (e.g. int*double) made possible by modern compilers 
+// statements (e.g. int*double) made explicit by modern compilers.
 class Number {
   public:
     static void *operator new(std::size_t sz) { Number::nbytes += sz; return ::operator new(sz); };
