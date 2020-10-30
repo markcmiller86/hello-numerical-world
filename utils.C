@@ -135,10 +135,13 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         for (i = 0; i < n; i++)
             a[i] = base + amp * (2*random()/maxr - 1);
     }
-    else if (!strncmp(ic, "sin(Pi*x)", 9)) /* sin(PI*x) */
+    else if (!strncmp(ic, "sin(", 4)) /* A*sin(PI*w*x) */
     {
+        char *p;
+        double amp = strtod(ic+4,&p);
+        double w = strtod(p+1, 0);
         for (i = 0, x = 0; i < n; i++, x+=dx)
-            a[i] = sin(M_PI*x);
+            a[i] = amp * sin(M_PI*w*x);
     }
     else if (!strncmp(ic, "spikes(", 7)) /* spikes(Const,Amp,Loc,Amp,Loc,...) */
     {
@@ -158,6 +161,27 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         }
 
     }
+    else if (!strncmp(ic, "file(", 5)) /* file(numbers.dat) */
+    {
+        FILE *icfile;
+        char *filename = strdup(&ic[5]);
+        char *parenchar  = strchr(filename, ')');
+        double val;
 
+        /* open the file */
+        assert(parenchar!=0);
+        *parenchar = '\0';
+        icfile = fopen(filename, "r");
+        assert(icfile!=0);
+
+        /* read the data */
+        for (i = 0; (i < n) && (fscanf(icfile, "%lg", &val) == 1); i++)
+            a[i] = val;
+        assert(i==n);
+
+        /* cleanup */
+        fclose(icfile);
+        free(filename);
+    }
     write_array(TSTART, Nx, dx, a);
 }
