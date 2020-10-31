@@ -176,6 +176,7 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         /* read the data */
         for (i = 0; (i < n) && (fscanf(icfile, "%lg", &val) == 1); i++)
             a[i] = val;
+        assert(i==n);
         assert(feof(icfile));
 
         /* cleanup */
