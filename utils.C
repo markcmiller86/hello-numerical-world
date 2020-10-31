@@ -159,7 +159,6 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
             a[idx] = amp;
             p = ep_idx;
         }
-
     }
     else if (!strncmp(ic, "file(", 5)) /* file(numbers.dat) */
     {

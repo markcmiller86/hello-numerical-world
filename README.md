@@ -108,6 +108,6 @@ The initial condition argument, `ic`, handles some interesting cases...
 * **Random**, `ic="rand(S,B,A)"`: Set initial condition to random values in the range [B-A,B+A] using seed value `S`.
 * **Sin**, `ic="sin(A,w)"`: Set initial condition to $$Asin(\pi \omega x)$$.   
 * **Spikes**, `ic="spikes(C,A0,X0,A1,X1,...)"`: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, x.
-* **File**, ic="file(foo.dat)" : read initial condition data from the file `foo.dat`
+* **File**, ic="file(foo.dat)" : read initial condition data from the file `foo.dat`. **Note**: you may also need to specify boundary condition arguments, `bc0=` and `bc1=` such that they *combine* smoothly with the contents of the file.
 
 ```
