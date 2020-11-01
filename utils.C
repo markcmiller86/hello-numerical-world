@@ -168,15 +168,16 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         double val;
 
         /* open the file */
-        assert(parenchar!=0);
+        assert(parenchar);
         *parenchar = '\0';
         icfile = fopen(filename, "r");
-        assert(icfile!=0);
+        assert(icfile);
 
         /* read the data */
-        for (i = 0; (i < n) && (fscanf(icfile, "%lg", &val) == 1); i++)
+        for (i = 0; fscanf(icfile, "%lg", &val) == 1; i++)
             a[i] = val;
         assert(i==n);
+        assert(!ferror(icfile));
         assert(feof(icfile));
 
         /* cleanup */
