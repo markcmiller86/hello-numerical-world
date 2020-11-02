@@ -63,6 +63,29 @@ extern int outi;
 extern int noout;
 int const prec = FPTYPE;
 
+static void handle_help(char const *argv0)
+{
+    fprintf(stderr, "Examples...\n");
+    fprintf(stderr, "    %s dx=0.01 dt=0.0002 alg=ftcs\n", argv0);
+    fprintf(stderr, "    %s dx=0.1 bc0=273 bc1=273 ic=\"spikes(273,5,373)\"\n", argv0);
+    fprintf(stderr, "    %s ic=\"help\" to get help on initial condition options\n", argv0);
+}
+
+static void handle_ic_help()
+{
+    fprintf(stderr, "Initial condition options...\n");
+    fprintf(stderr, "    ic=\"const(V)\" constant value, V\n");
+    fprintf(stderr, "    ic=\"ramp(L,R)\" linear ramp with value L @ x=0 and R @ x=lenx\n");
+    fprintf(stderr, "    ic=\"step(L,Mx,R)\" a step function with value L for x<Mx and R for x>=Mx\n");
+    fprintf(stderr, "    ic=\"rand(S,B,A)\" random values in the range [B-A,B+A] using seed S\n");
+    fprintf(stderr, "    ic=\"sin(A,w)\" a sin wave with amplitude A and frequency w\n");
+    fprintf(stderr, "    ic=\"spikes(C,A0,X0,A1,X1,...)\" a constant value, C with N spikes of amplitude Ai at position Xi\n");
+    fprintf(stderr, "    ic=\"file(foo.dat)\" : read initial condition data from the file foo.dat\n");
+    fprintf(stderr,
+        "Be sure to use double-quotes (\") as shown and you may also need to set boundary"
+        "\nconditions such that they *combine* smoothly with the initial conditions.\n");
+}
+
 void
 process_args(int argc, char **argv)
 {
@@ -77,7 +100,6 @@ process_args(int argc, char **argv)
     if (help)
         fprintf(stderr, "Usage: %s <arg>=<value> <arg>=<value>...\n", argv[0]);
 
-    HANDLE_ARG(runame, char*, %s, name to give run and results dir);
     HANDLE_ARG(alpha, fpnumber, %g, material thermal diffusivity (sq-meters/second));
     HANDLE_ARG(lenx, fpnumber, %g, material length (meters));
     HANDLE_ARG(dx, fpnumber, %g, x-incriment. Best if lenx/dx==int. (meters));
@@ -85,6 +107,7 @@ process_args(int argc, char **argv)
     HANDLE_ARG(maxt, fpnumber, %g, >0:max sim time (seconds) | <0:min l2 change in soln);
     HANDLE_ARG(bc0, fpnumber, %g, boundary condition @ x=0: u(0,t) (Kelvin));
     HANDLE_ARG(bc1, fpnumber, %g, boundary condition @ x=lenx: u(lenx,t) (Kelvin));
+    HANDLE_ARG(runame, char*, %s, name to give run and results dir);
     HANDLE_ARG(ic, char*, %s, initial condition @ t=0: u(x,0) (Kelvin));
     HANDLE_ARG(alg, char*, %s, algorithm ftcs|dufrank|crankn);
     HANDLE_ARG(savi, int, %d, save every i-th solution step);
@@ -94,12 +117,16 @@ process_args(int argc, char **argv)
     HANDLE_ARG(prec, const int, %d, precision 0=half/1=float/2=double/3=long double)
 
     if (help)
+        handle_help(argv[0]);
+
+    if (strcasestr(ic, "help"))
     {
-        fprintf(stderr, "Examples...\n");
-        fprintf(stderr, "    %s dx=0.01 dt=0.0002 alg=ftcs\n", argv[0]);
-        fprintf(stderr, "    %s dx=0.1 bc0=273 bc1=273 ic=\"spikes(273,5,373)\"\n", argv[0]);
+        handle_ic_help();
         exit(1);
     }
+
+    if (help)
+        exit(1);
 
     // Handle possible termination by change threshold criterion
     if (maxt < 0)
