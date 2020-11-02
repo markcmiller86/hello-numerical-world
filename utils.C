@@ -174,11 +174,13 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         assert(icfile);
 
         /* read the data */
-        for (i = 0; fscanf(icfile, "%lg", &val) == 1; i++)
+        for (i = 0; (fscanf(icfile, "%lg", &val) == 1) && (i<n); i++)
             a[i] = val;
-        assert(i==n);
+
+        /* sanity checks */
         assert(!ferror(icfile));
         assert(feof(icfile));
+        assert(i==n);
 
         /* cleanup */
         fclose(icfile);
