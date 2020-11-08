@@ -4,7 +4,7 @@ compiler:
   - gcc
 
 script:
-  - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check_all
+  - make CXXFLAGS=--coverage LDFLAGS="--coverage -lm" check
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
