@@ -2,6 +2,7 @@
 ERRBND ?= 1e-6
 PTOOL ?= visit
 RUNAME ?= heat_results
+PIPEWIDTH ?= 0.1
 RM = rm
 
 HDR = Number.H Half.H
@@ -60,7 +61,7 @@ heat-long-double: heat
 
 # convenient target to plot results
 plot:
-	@./tools/run_$(PTOOL).sh $(RUNAME)
+	@./tools/run_$(PTOOL).sh $(RUNAME) $(PIPEWIDTH)
 
 check_clean:
 	$(RM) -rf check check_crankn check_dufrank

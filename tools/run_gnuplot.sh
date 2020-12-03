@@ -2,15 +2,16 @@
 
 tmpfil=$1/$1_soln_final.curve
 lenx=$(tail -1 $1/$1_soln_final.curve | tr -s ' ' | cut -d' ' -f2)
+lenp2=$(perl -e "print $2/2")
 
 # Compute midpoint through wall
 lenx2=$(perl -e "print $lenx/2")
 
 # Compute left bound of pipe's width
-p0=$(perl -e "print $lenx2-0.05")
+p0=$(perl -e "print $lenx2-$lenp2")
 
 # Compute right bound of pipe's width
-p1=$(perl -e "print $lenx2+0.05")
+p1=$(perl -e "print $lenx2+$lenp2")
 
 gnuplot << EOF 1>/dev/null 2>&1 &
 set xlabel "Distance (meters)"

@@ -2,15 +2,16 @@
 
 tmpfil=/tmp/$1_$$_$USER.curve
 lenx=$(tail -1 $1/$1_soln_final.curve | tr -s ' ' | cut -d' ' -f2)
+lenp2=$(perl -e "print $2/2")
 
 # Compute midpoint through wall
 lenx2=$(perl -e "print $lenx/2")
 
 # Compute left bound of pipe's width
-p0=$(perl -e "print $lenx2-0.05")
+p0=$(perl -e "print $lenx2-$lenp2")
 
 # Compute right bound of pipe's width
-p1=$(perl -e "print $lenx2+0.05")
+p1=$(perl -e "print $lenx2+$lenp2")
 
 # Pour all the data into a single file
 cat $1/$1_soln_final.curve > $tmpfil
