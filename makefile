@@ -61,7 +61,9 @@ heat-long-double: heat
 
 # convenient target to plot results
 plot:
-	@./tools/run_$(PTOOL).sh $(RUNAME) $(PIPEWIDTH)
+	@test -r ./tools/run_$(PTOOL).sh || ( echo "Cannot find plotting tool \"$(PTOOL)\"" && exit 1 )
+	@test -d $(RUNAME) || ( echo "Cannot find results dir \"$(RUNAME)\"" && exit 1 )
+	@test -d $(RUNAME) && ./tools/run_$(PTOOL).sh $(RUNAME) $(PIPEWIDTH)
 
 check_clean:
 	$(RM) -rf check check_crankn check_dufrank
