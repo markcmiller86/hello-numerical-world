@@ -105,11 +105,11 @@ Examples...
 The initial condition argument, `ic=`, handles various cases...
     
 * **Constant**, `ic="const(V)"`: Set initial condition to constant value, `V`
-* **Ramp**, `ic="ramp(L,R)"`: Set initial condition to a linear ramp having value `L` @ x=0 and `R` @ x=$$L_x$$.
-* **Step**, `ic="step(L,Mx,R)"`: Set initial condition to a step function having value `L` for all x<Mx and value `R` for all x>=Mx.
-* **Random**, `ic="rand(S,B,A)"`: Set initial condition to random values in the range [B-A,B+A] using seed value `S`.
-* **Sin**, `ic="sin(A,w)"`: Set initial condition to $$Asin(\pi \omega x)$$.   
-* **Spikes**, `ic="spikes(C,A0,X0,A1,X1,...)"`: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, x.
+* **Ramp**, `ic="ramp(L,R)"`: Set initial condition to a linear ramp having value `L` @ `x=0` and `R` @ `x=L_x`.
+* **Step**, `ic="step(L,Mx,R)"`: Set initial condition to a step function having value `L` for all `x<Mx` and value `R` for all `x>=Mx`.
+* **Random**, `ic="rand(S,B,A)"`: Set initial condition to random values in the range `[B-A,B+A]` using seed value `S`.
+* **Sin**, `ic="sin(A,w)"`: Set initial condition to `A*sin(pi*w*x)`.   
+* **Spikes**, `ic="spikes(C,A0,X0,A1,X1,...)"`: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, `x`.
 * **File**, ic="file(foo.dat)" : read initial condition data from the file `foo.dat`.
 
-**Note**: The boundary condition arguments, `bc0=` and `bc1=` must be specifieid such that they *combine* smoothly with the specified initial condition.
+**Note**: The boundary condition arguments, `bc0=` and `bc1=` must be specified such that they *combine* smoothly with the specified initial condition.
