@@ -4,7 +4,7 @@ This is an implementation of an application for solving one dimensional heat con
 problems. It is the functional equivalent of a *Hello World* application for HPC/CSE.
 
 In general, heat [conduction](https://en.wikipedia.org/wiki/Thermal_conduction) is governed
-by the partial differential ([PDE](https://en.wikipedia.org/wiki/Partial_differential_equation))...
+by the partial differential equation ([PDE](https://en.wikipedia.org/wiki/Partial_differential_equation))...
 
 | | |
 |:---:|:---:|
@@ -12,7 +12,7 @@ by the partial differential ([PDE](https://en.wikipedia.org/wiki/Partial_differe
 
 where _u_ is the temperature at spatial positions, _x_, and times, _t_,
 ![](http://latex.codecogs.com/gif.latex?%5Calpha) is the _thermal diffusivity_
-of the homogeneous material through which heat is flowing. This PDE
+of the material through which heat is flowing. This PDE
 is known as the _Diffusion Equation_ and also the [_Heat Equation_](https://en.wikipedia.org/wiki/Heat_equation).
 
 ### Simplifying Assumptions
@@ -70,7 +70,7 @@ Targets:
 ```
 
 `make heat` will make the heat application with *default* (double) precision.
-After making the application with the, the command...
+After making the application, the command...
 
 ```
 ./heat --help
@@ -100,9 +100,9 @@ Examples...
     ./heat dx=0.1 bc0=273 bc1=273 ic="spikes(273,5,373)"
 ```
 
-### The Initial Condition Argument
+### Setting the Initial Condition (`ic=`)
 
-The initial condition argument, `ic`, handles some interesting cases...
+The initial condition argument, `ic=`, handles various cases...
     
 * **Constant**, `ic="const(V)"`: Set initial condition to constant value, `V`
 * **Ramp**, `ic="ramp(L,R)"`: Set initial condition to a linear ramp having value `L` @ x=0 and `R` @ x=$$L_x$$.
@@ -110,6 +110,6 @@ The initial condition argument, `ic`, handles some interesting cases...
 * **Random**, `ic="rand(S,B,A)"`: Set initial condition to random values in the range [B-A,B+A] using seed value `S`.
 * **Sin**, `ic="sin(A,w)"`: Set initial condition to $$Asin(\pi \omega x)$$.   
 * **Spikes**, `ic="spikes(C,A0,X0,A1,X1,...)"`: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, x.
-* **File**, ic="file(foo.dat)" : read initial condition data from the file `foo.dat`. **Note**: you may also need to specify boundary condition arguments, `bc0=` and `bc1=` such that they *combine* smoothly with the contents of the file.
+* **File**, ic="file(foo.dat)" : read initial condition data from the file `foo.dat`.
 
-```
+**Note**: The boundary condition arguments, `bc0=` and `bc1=` must be specifieid such that they *combine* smoothly with the specified initial condition.
