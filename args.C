@@ -20,7 +20,7 @@ static char clargs[2048];
             if      (style[1] == 'd') /* int */ \
                 *((int*) valp) = (int) strtol(argv[i]+len,0,10); \
             else if (style[1] == 'g') /* double */ \
-                *((Number*) valp) = (fpnumber) strtod(argv[i]+len,0); \
+                *((Number*) valp) = (Number) strtod(argv[i]+len,0); \
             else if (style[1] == 's') /* char* */ \
                 *((char**) valp) = (char*) strdup(argv[i]+len); \
         }\
@@ -100,13 +100,13 @@ process_args(int argc, char **argv)
     if (help)
         fprintf(stderr, "Usage: %s <arg>=<value> <arg>=<value>...\n", argv[0]);
 
-    HANDLE_ARG(alpha, fpnumber, %g, material thermal diffusivity (sq-meters/second));
-    HANDLE_ARG(lenx, fpnumber, %g, material length (meters));
-    HANDLE_ARG(dx, fpnumber, %g, x-incriment. Best if lenx/dx==int. (meters));
-    HANDLE_ARG(dt, fpnumber, %g, t-incriment (seconds));
-    HANDLE_ARG(maxt, fpnumber, %g, >0:max sim time (seconds) | <0:min l2 change in soln);
-    HANDLE_ARG(bc0, fpnumber, %g, boundary condition @ x=0: u(0,t) (Kelvin));
-    HANDLE_ARG(bc1, fpnumber, %g, boundary condition @ x=lenx: u(lenx,t) (Kelvin));
+    HANDLE_ARG(alpha, Number, %g, material thermal diffusivity (sq-meters/second));
+    HANDLE_ARG(lenx, Number, %g, material length (meters));
+    HANDLE_ARG(dx, Number, %g, x-incriment. Best if lenx/dx==int. (meters));
+    HANDLE_ARG(dt, Number, %g, t-incriment (seconds));
+    HANDLE_ARG(maxt, Number, %g, >0:max sim time (seconds) | <0:min l2 change in soln);
+    HANDLE_ARG(bc0, Number, %g, boundary condition @ x=0: u(0,t) (Kelvin));
+    HANDLE_ARG(bc1, Number, %g, boundary condition @ x=lenx: u(lenx,t) (Kelvin));
     HANDLE_ARG(runame, char*, %s, name to give run and results dir);
     HANDLE_ARG(ic, char*, %s, initial condition @ t=0: u(x,0) (Kelvin));
     HANDLE_ARG(alg, char*, %s, algorithm ftcs|dufrank|crankn);

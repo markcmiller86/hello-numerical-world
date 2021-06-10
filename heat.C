@@ -2,12 +2,6 @@
 
 #include "heat.H"
 
-// Number class' statics
-int         Number::nadds  = 0;
-int         Number::nmults = 0;
-int         Number::ndivs  = 0;
-std::size_t Number::nbytes = 0;
-
 // Command-line argument variables
 int noout        = 0;
 int savi         = 0;
@@ -37,19 +31,6 @@ Number *cn_Amat        = 0; // A matrix for Crank-Nicholson
 // Number of points in space, x, and time, t.
 int Nx;
 int Nt;
-
-// Utilities
-extern Number
-l2_norm(int n, Number const *a, Number const *b);
-
-extern void
-copy(int n, Number *dst, Number const *src);
-
-extern void
-write_array(int t, int n, Number dx, Number const *a);
-
-extern void
-set_initial_condition(int n, Number *a, Number dx, char const *ic);
 
 extern void
 initialize_crankn(int n,
@@ -125,17 +106,16 @@ int finalize(int ti, Number maxt, Number change)
 {
     int retval = 0;
 
-    write_array(TFINAL, Nx, dx, curr);
+    write_array(ArrType::TFINAL, Nx, dx, curr);
     if (save)
     {
-        write_array(RESIDUAL, ti, dt, change_history);
-        write_array(ERROR, ti, dt, error_history);
+        write_array(ArrType::RESIDUAL, ti, dt, change_history);
+        write_array(ArrType::ERROR, ti, dt, error_history);
     }
 
     if (outi)
     {
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
-        printf("Counts: %s\n", Number::counts_string());
     }
 
     delete [] curr;
@@ -170,13 +150,13 @@ update_output_files(int ti)
 
     if (ti>0 && save)
     {
-        compute_exact_solution(Nx, exact, dx, ic, alpha, ti*dt, bc0, bc1);
+        compute_exact_solution(Nx, exact, dx, ic, alpha, castNum(ti*dt), bc0, bc1);
         if (savi && ti%savi==0)
-            write_array(ti, Nx, dx, exact);
+            write_array(ArrType::EXACT, Nx, dx, exact, ti);
     }
 
     if (ti>0 && savi && ti%savi==0)
-        write_array(ti, Nx, dx, curr);
+        write_array(ArrType::STEP, Nx, dx, curr, ti);
 
     change = l2_norm(Nx, curr, back1);
     if (save)

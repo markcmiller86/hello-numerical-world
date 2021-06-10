@@ -10,13 +10,13 @@ Number
 l2_norm(int n, Number const *a, Number const *b)
 {
     int i;
-    Number sum = 0;
+    Number sum(0.0);
     for (i = 0; i < n; i++)
     {
         Number diff = a[i] - b[i];
         sum += diff * diff;
     }
-    return sum / n;
+    return sum / castNum(n);
 }
 
 void
@@ -28,7 +28,7 @@ copy(int n, Number *dst, Number const *src)
 }
 
 void
-write_array(int t, int n, Number dx, Number const *a)
+write_array(ArrType t, int n, Number dx, Number const *a, int time)
 {
     int i;
     char fname[128];
@@ -37,38 +37,31 @@ write_array(int t, int n, Number dx, Number const *a)
 
     if (noout) return;
 
-    if (t == TSTART)
-    {
+    switch(t) {
+    case ArrType::TSTART:
         snprintf(fname, sizeof(fname), "%s/%s_soln_00000.curve", runame, runame);
         snprintf(vname, sizeof(vname), "Temperature");
-    }
-    else if (t == TFINAL)
-    {
+        break;
+    case ArrType::TFINAL:
         snprintf(fname, sizeof(fname), "%s/%s_soln_final.curve", runame, runame);
         snprintf(vname, sizeof(vname), "Temperature");
-    }
-    else if (t == RESIDUAL)
-    {
+        break;
+    case ArrType::RESIDUAL:
         snprintf(fname, sizeof(fname), "%s/%s_change.curve", runame, runame);
         snprintf(vname, sizeof(vname), "%s/%s_l2_change", runame, runame);
-    }
-    else if (t == ERROR)
-    {
+        break;
+    case ArrType::ERROR:
         snprintf(fname, sizeof(fname), "%s/%s_error.curve", runame, runame);
         snprintf(vname, sizeof(vname), "%s/%s_l2", runame, runame);
-    }
-    else
-    {
-        if (a == exact)
-        {
-            snprintf(fname, sizeof(fname), "%s/%s_exact_%05d.curve", runame, runame, t);
-            snprintf(vname, sizeof(vname), "exact_temperature");
-        } 
-        else
-        {
-            snprintf(fname, sizeof(fname), "%s/%s_soln_%05d.curve", runame, runame, t);
-            snprintf(vname, sizeof(vname), "Temperature");
-        }
+        break;
+    case ArrType::EXACT:
+        snprintf(fname, sizeof(fname), "%s/%s_exact_%05d.curve", runame, runame, time);
+        snprintf(vname, sizeof(vname), "exact_temperature");
+        break;
+    case ArrType::STEP:
+        snprintf(fname, sizeof(fname), "%s/%s_soln_%05d.curve", runame, runame, time);
+        snprintf(vname, sizeof(vname), "Temperature");
+        break;
     }
 
 
@@ -83,7 +76,7 @@ write_array(int t, int n, Number dx, Number const *a)
 #elif FPTYPE == 2
         fprintf(outf, "%- 19.17e %- 19.17e\n", (double) (i*dx), (double) a[i]);
 #elif FPTYPE == 3
-        fprintf(outf, "%- 27.25Le %- 27.25Le\n", (fpnumber) (i*dx), (fpnumber) a[i]);
+        fprintf(outf, "%- 27.25Le %- 27.25Le\n", (Number) (i*dx), (Number) a[i]);
 #elif 
 #error UNKNOWN FPTYPE
 #endif
@@ -186,5 +179,5 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         fclose(icfile);
         free(filename);
     }
-    write_array(TSTART, Nx, dx, a);
+    write_array(ArrType::TSTART, Nx, dx, a);
 }

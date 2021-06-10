@@ -11,7 +11,7 @@ update_solution_dufrank(
     Number bc0, Number bc1) // boundary conditions @ x=0 & x=Lx
 {
     Number r = alpha * dt / (dx * dx);
-    Number q = 1 / (1+r);
+    Number q = castNum(1.0) / (castNum(1.0)+r);
 
     // FTCS update algorithm
     for (int i = 1; i < n-1; i++)
