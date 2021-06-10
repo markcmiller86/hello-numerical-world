@@ -2,8 +2,6 @@
 
 extern int Nx;
 extern Number *exact;
-extern char const *runame;
-extern int noout;
 
 // Utilities
 Number
@@ -27,39 +25,38 @@ copy(int n, Number *dst, Number const *src)
         dst[i] = src[i];
 }
 
-void
-write_array(ArrType t, int n, Number dx, Number const *a, int time)
+void write_array(ArrType t, Args &arg, int n, Number step, Number const *a, int time)
 {
     int i;
     char fname[128];
     char vname[64];
     FILE *outf;
 
-    if (noout) return;
+    if (arg.noout) return;
 
     switch(t) {
     case ArrType::TSTART:
-        snprintf(fname, sizeof(fname), "%s/%s_soln_00000.curve", runame, runame);
+        snprintf(fname, sizeof(fname), "%s/%s_soln_00000.curve", arg.runame, arg.runame);
         snprintf(vname, sizeof(vname), "Temperature");
         break;
     case ArrType::TFINAL:
-        snprintf(fname, sizeof(fname), "%s/%s_soln_final.curve", runame, runame);
+        snprintf(fname, sizeof(fname), "%s/%s_soln_final.curve", arg.runame, arg.runame);
         snprintf(vname, sizeof(vname), "Temperature");
         break;
     case ArrType::RESIDUAL:
-        snprintf(fname, sizeof(fname), "%s/%s_change.curve", runame, runame);
-        snprintf(vname, sizeof(vname), "%s/%s_l2_change", runame, runame);
+        snprintf(fname, sizeof(fname), "%s/%s_change.curve", arg.runame, arg.runame);
+        snprintf(vname, sizeof(vname), "%s/%s_l2_change", arg.runame, arg.runame);
         break;
     case ArrType::ERROR:
-        snprintf(fname, sizeof(fname), "%s/%s_error.curve", runame, runame);
-        snprintf(vname, sizeof(vname), "%s/%s_l2", runame, runame);
+        snprintf(fname, sizeof(fname), "%s/%s_error.curve", arg.runame, arg.runame);
+        snprintf(vname, sizeof(vname), "%s/%s_l2", arg.runame, arg.runame);
         break;
     case ArrType::EXACT:
-        snprintf(fname, sizeof(fname), "%s/%s_exact_%05d.curve", runame, runame, time);
+        snprintf(fname, sizeof(fname), "%s/%s_exact_%05d.curve", arg.runame, arg.runame, time);
         snprintf(vname, sizeof(vname), "exact_temperature");
         break;
     case ArrType::STEP:
-        snprintf(fname, sizeof(fname), "%s/%s_soln_%05d.curve", runame, runame, time);
+        snprintf(fname, sizeof(fname), "%s/%s_soln_%05d.curve", arg.runame, arg.runame, time);
         snprintf(vname, sizeof(vname), "Temperature");
         break;
     }
@@ -70,13 +67,13 @@ write_array(ArrType t, int n, Number dx, Number const *a, int time)
     for (i = 0; i < n; i++)
     {
 #if FPTYPE == 0
-        fprintf(outf, "%- 7.5e %- 7.5e\n", double(i*dx), double(a[i]));
+        fprintf(outf, "%- 7.5e %- 7.5e\n", double(i*step), double(a[i]));
 #elif FPTYPE == 1
-        fprintf(outf, "%- 11.9e %- 11.9e\n", (double) (i*dx), (double) a[i]);
+        fprintf(outf, "%- 11.9e %- 11.9e\n", (double) (i*step), (double) a[i]);
 #elif FPTYPE == 2
-        fprintf(outf, "%- 19.17e %- 19.17e\n", (double) (i*dx), (double) a[i]);
+        fprintf(outf, "%- 19.17e %- 19.17e\n", (double) (i*step), (double) a[i]);
 #elif FPTYPE == 3
-        fprintf(outf, "%- 27.25Le %- 27.25Le\n", (Number) (i*dx), (Number) a[i]);
+        fprintf(outf, "%- 27.25Le %- 27.25Le\n", (Number) (i*step), (Number) a[i]);
 #elif 
 #error UNKNOWN FPTYPE
 #endif
@@ -84,43 +81,42 @@ write_array(ArrType t, int n, Number dx, Number const *a, int time)
     fclose(outf);
 }
 
-void
-set_initial_condition(int n, Number *a, Number dx, char const *ic)
+void set_initial_condition(Args &arg, int n, Number *a)
 {
     int i;
     double x;
 
-    if (!strncmp(ic, "const(", 6)) /* const(val) */
+    if (!strncmp(arg.ic, "const(", 6)) /* const(val) */
     {
-        double cval = strtod(ic+6, 0);
+        double cval = strtod(arg.ic+6, 0);
         for (i = 0; i < n; i++)
             a[i] = cval;
     }
-    else if (!strncmp(ic, "step(", 5)) /* step(left,xmid,right) */
+    else if (!strncmp(arg.ic, "step(", 5)) /* step(left,xmid,right) */
     {
         char *p;
-        double left = strtod(ic+5, &p);
+        double left = strtod(arg.ic+5, &p);
         double xmid = strtod(p+1, &p);
         double right = strtod(p+1, 0);
-        for (i = 0, x = 0; i < n; i++, x+=dx)
+        for (i = 0, x = 0; i < n; i++, x+=arg.dx)
         {
             if (x < xmid) a[i] = left;
             else          a[i] = right;
         }
     }
-    else if (!strncmp(ic, "ramp(", 5)) /* ramp(left,right) */
+    else if (!strncmp(arg.ic, "ramp(", 5)) /* ramp(left,right) */
     {
         char *p;
-        double left = strtod(ic+5, &p);
+        double left = strtod(arg.ic+5, &p);
         double right = strtod(p+1, 0);
         double dv = (right-left)/(n-1);
         for (i = 0, x = left; i < n; i++, x+=dv)
             a[i] = x;
     }
-    else if (!strncmp(ic, "rand(", 5)) /* rand(seed,base,amp) */
+    else if (!strncmp(arg.ic, "rand(", 5)) /* rand(seed,base,amp) */
     {
         char *p, *ep;
-        int seed = (int) strtol(ic+5,&p,10);
+        int seed = (int) strtol(arg.ic+5,&p,10);
         double base = strtod(p+1, &p);
         double amp = strtod(p+1, 0);
         const double maxr = ((long long)1<<31)-1;
@@ -128,18 +124,18 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         for (i = 0; i < n; i++)
             a[i] = base + amp * (2*random()/maxr - 1);
     }
-    else if (!strncmp(ic, "sin(", 4)) /* A*sin(PI*w*x) */
+    else if (!strncmp(arg.ic, "sin(", 4)) /* A*sin(PI*w*x) */
     {
         char *p;
-        double amp = strtod(ic+4,&p);
+        double amp = strtod(arg.ic+4,&p);
         double w = strtod(p+1, 0);
-        for (i = 0, x = 0; i < n; i++, x+=dx)
+        for (i = 0, x = 0; i < n; i++, x+=arg.dx)
             a[i] = amp * sin(M_PI*w*x);
     }
-    else if (!strncmp(ic, "spikes(", 7)) /* spikes(Const,Amp,Loc,Amp,Loc,...) */
+    else if (!strncmp(arg.ic, "spikes(", 7)) /* spikes(Const,Amp,Loc,Amp,Loc,...) */
     {
         char *next;
-        double cval = strtod(ic+7, &next);
+        double cval = strtod(arg.ic+7, &next);
         char const *p = next;
         for (i = 0, x = 0; i < n; i++)
             a[i] = cval;
@@ -153,10 +149,10 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
             p = ep_idx;
         }
     }
-    else if (!strncmp(ic, "file(", 5)) /* file(numbers.dat) */
+    else if (!strncmp(arg.ic, "file(", 5)) /* file(numbers.dat) */
     {
         FILE *icfile;
-        char *filename = strdup(&ic[5]);
+        char *filename = strdup(&arg.ic[5]);
         char *parenchar  = strchr(filename, ')');
         double val;
 
@@ -179,5 +175,5 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         fclose(icfile);
         free(filename);
     }
-    write_array(ArrType::TSTART, Nx, dx, a);
+    write_array(ArrType::TSTART, arg, Nx, arg.dx, a);
 }

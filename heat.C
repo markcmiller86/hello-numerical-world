@@ -2,23 +2,6 @@
 
 #include "heat.H"
 
-// Command-line argument variables
-int noout        = 0;
-int savi         = 0;
-int outi         = 100;
-int save         = 0;
-char const *runame = "heat_results";
-char const *alg  = "ftcs";
-char const *ic   = "const(1)";
-Number lenx      = Number(1.0);
-Number alpha     = Number(0.2);
-Number dt        = Number(0.004);
-Number dx        = Number(0.1);
-Number bc0       = Number(0.0);
-Number bc1       = Number(1.0);
-Number maxt      = Number(2.0);
-Number min_change = Number(1e-8*1e-8);
-
 // Various arrays of numerical data
 Number *curr           = 0; // current solution
 Number *back1          = 0; // solution back 1 step
@@ -36,9 +19,6 @@ extern void
 initialize_crankn(int n,
     Number alpha, Number dx, Number dt,
     Number **_cn_Amat);
-
-extern void
-process_args(int argc, char **argv);
 
 extern void 
 compute_exact_solution(int n, Number *a, Number dx, char const *ic,
@@ -69,51 +49,51 @@ update_solution_dufrank(int n, Number *curr,
     Number bc_0, Number bc_1);
 
 static void
-initialize(void)
+initialize(Args &arg)
 {
-    Nx = (int) round((double)(lenx/dx))+1;
-    Nt = (int) (maxt/dt);
-    dx = lenx/(Nx-1);
+    Nx = (int) round((double)(arg.lenx/arg.dx))+1;
+    Nt = (int) (arg.maxt/arg.dt);
+    arg.dx = arg.lenx/(Nx-1);
 
     curr  = new Number[Nx]();
     back1 = new Number[Nx]();
-    if (save)
+    if (arg.save)
     {
         exact = new Number[Nx]();
         change_history = new Number[Nx]();
         error_history = new Number[Nx]();
     }
 
-    assert(strncmp(alg, "ftcs", 4)==0 ||
-           strncmp(alg, "dufrank", 7)==0 ||
-           strncmp(alg, "crankn", 6)==0);
+    assert(strncmp(arg.alg, "ftcs", 4)==0 ||
+           strncmp(arg.alg, "dufrank", 7)==0 ||
+           strncmp(arg.alg, "crankn", 6)==0);
 
 #ifdef HAVE_FEENABLEEXCEPT
     feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 #endif
 
-    if (!strncmp(alg, "crankn", 6))
-        initialize_crankn(Nx, alpha, dx, dt, &cn_Amat);
+    if (!strncmp(arg.alg, "crankn", 6))
+        initialize_crankn(Nx, arg.alpha, arg.dx, arg.dt, &cn_Amat);
 
-    if (!strncmp(alg, "dufrank", 7))
+    if (!strncmp(arg.alg, "dufrank", 7))
         back2 = new Number[Nx]();
 
     /* Initial condition */
-    set_initial_condition(Nx, back1, dx, ic);
+    set_initial_condition(arg, Nx, back1);
 }
 
-int finalize(int ti, Number maxt, Number change)
+int finalize(Args &arg, int ti, Number maxt, Number change)
 {
     int retval = 0;
 
-    write_array(ArrType::TFINAL, Nx, dx, curr);
-    if (save)
+    write_array(ArrType::TFINAL, arg, Nx, arg.dx, curr);
+    if (arg.save)
     {
-        write_array(ArrType::RESIDUAL, ti, dt, change_history);
-        write_array(ArrType::ERROR, ti, dt, error_history);
+        write_array(ArrType::RESIDUAL, arg, ti, arg.dt, change_history);
+        write_array(ArrType::ERROR, arg, ti, arg.dt, error_history);
     }
 
-    if (outi)
+    if (arg.outi)
     {
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
     }
@@ -125,41 +105,41 @@ int finalize(int ti, Number maxt, Number change)
     if (change_history) delete [] change_history;
     if (error_history) delete [] error_history;
     if (cn_Amat) delete [] cn_Amat;
-    if (strncmp(alg, "ftcs", 4)) free((void*)alg);
-    if (strncmp(ic, "const(1)", 8)) free((void*)ic);
+    if (strncmp(arg.alg, "ftcs", 4)) free((void*)arg.alg);
+    if (strncmp(arg.ic, "const(1)", 8)) free((void*)arg.ic);
 
     return retval;
 }
 
 static bool
-update_solution()
+update_solution(Args &arg)
 {
-    if (!strcmp(alg, "ftcs"))
-        return update_solution_ftcs(Nx, curr, back1, alpha, dx, dt, bc0, bc1);
-    else if (!strcmp(alg, "crankn"))
-        return update_solution_crankn(Nx, curr, back1, cn_Amat, bc0, bc1);
-    else if (!strcmp(alg, "dufrank"))
-        return update_solution_dufrank(Nx, curr, back1, back2, alpha, dx, dt, bc0, bc1);
+    if (!strcmp(arg.alg, "ftcs"))
+        return update_solution_ftcs(Nx, curr, back1, arg.alpha, arg.dx, arg.dt, arg.bc0, arg.bc1);
+    else if (!strcmp(arg.alg, "crankn"))
+        return update_solution_crankn(Nx, curr, back1, cn_Amat, arg.bc0, arg.bc1);
+    else if (!strcmp(arg.alg, "dufrank"))
+        return update_solution_dufrank(Nx, curr, back1, back2, arg.alpha, arg.dx, arg.dt, arg.bc0, arg.bc1);
     return false;
 }
 
 static Number
-update_output_files(int ti)
+update_output_files(Args &arg, int ti)
 {
     Number change;
 
-    if (ti>0 && save)
+    if (ti>0 && arg.save)
     {
-        compute_exact_solution(Nx, exact, dx, ic, alpha, castNum(ti*dt), bc0, bc1);
-        if (savi && ti%savi==0)
-            write_array(ArrType::EXACT, Nx, dx, exact, ti);
+        compute_exact_solution(Nx, exact, arg.dx, arg.ic, arg.alpha, castNum(ti*arg.dt), arg.bc0, arg.bc1);
+        if (arg.savi && ti%arg.savi==0)
+            write_array(ArrType::EXACT, arg, Nx, arg.dx, exact, ti);
     }
 
-    if (ti>0 && savi && ti%savi==0)
-        write_array(ArrType::STEP, Nx, dx, curr, ti);
+    if (ti>0 && arg.savi && ti%arg.savi==0)
+        write_array(ArrType::STEP, arg, Nx, arg.dx, curr, ti);
 
     change = l2_norm(Nx, curr, back1);
-    if (save)
+    if (arg.save)
     {
         change_history[ti] = change;
         error_history[ti] = l2_norm(Nx, curr, exact);
@@ -174,26 +154,26 @@ int main(int argc, char **argv)
     Number change;
 
     // Read command-line args and set values
-    process_args(argc, argv);
+    Args arg = process_args(argc, argv);
 
     // Allocate arrays and set initial conditions
-    initialize();
+    initialize(arg);
 
     // Iterate to max iterations or solution change is below threshold
-    for (ti = 0; ti*dt < maxt; ti++)
+    for (ti = 0; ti*arg.dt < arg.maxt; ti++)
     {
         // compute the next solution step
-        if (!update_solution())
+        if (!update_solution(arg))
         {
             fprintf(stderr, "Solution criteria violated. Make better choices\n");
             exit(1);
         }
 
         // compute amount of change in solution
-        change = update_output_files(ti);
+        change = update_output_files(arg, ti);
 
         // Handle possible termination by change threshold
-        if (maxt == INT_MAX && change < min_change)
+        if (arg.maxt == INT_MAX && change < arg.min_change)
         {
             printf("Stopped after %06d iterations for threshold %g\n",
                 ti, (double) change);
@@ -201,7 +181,7 @@ int main(int argc, char **argv)
         }
 
         // Output progress
-        if (outi && ti%outi==0)
+        if (arg.outi && ti%arg.outi==0)
             printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
 
         // Copy current solution to backi
@@ -212,5 +192,5 @@ int main(int argc, char **argv)
     }
 
     // Delete storage and output final results
-    return finalize(ti, maxt, change);
+    return finalize(arg, ti, arg.maxt, change);
 }

@@ -6,7 +6,7 @@ static char clargs[2048];
 { \
     char const *style = #STYLE; \
     char const *q = style[1]=='s'?"\"":""; \
-    void *valp = (void*) &VAR; \
+    void *valp = (void*) &ret.VAR; \
     int const len = strlen(#VAR)+1; \
     std::stringstream strmvar; \
     for (i = 1; i < argc; i++) \
@@ -25,7 +25,7 @@ static char clargs[2048];
                 *((char**) valp) = (char*) strdup(argv[i]+len); \
         }\
     }\
-    strmvar << VAR; \
+    strmvar << ret.VAR; \
     if (help) \
     {\
         char tmp[256]; \
@@ -46,22 +46,7 @@ static char clargs[2048];
     } \
 }
 
-extern Number alpha;
-extern Number lenx;
-extern Number dx;
-extern Number dt;
-extern Number maxt;
-extern Number bc0;
-extern Number bc1;
-extern Number min_change;
-extern char const *runame;
-extern char const *ic;
-extern char const *alg;
-extern int savi;
-extern int save;
-extern int outi;
-extern int noout;
-int const prec = FPTYPE;
+//int const prec = FPTYPE;
 
 static void handle_help(char const *argv0)
 {
@@ -86,9 +71,8 @@ static void handle_ic_help()
         "\nconditions such that they *combine* smoothly with the initial conditions.\n");
 }
 
-void
-process_args(int argc, char **argv)
-{
+Args process_args(int argc, char **argv) {
+    Args ret{};
     int i;
     int help = 0;
 
@@ -114,12 +98,12 @@ process_args(int argc, char **argv)
     HANDLE_ARG(save, int, %d, save error in every saved solution);
     HANDLE_ARG(outi, int, %d, output progress every i-th solution step);
     HANDLE_ARG(noout, int, %d, disable all file outputs);
-    HANDLE_ARG(prec, const int, %d, precision 0=half/1=float/2=double/3=long double)
+    //HANDLE_ARG(prec, const int, %d, precision 0=half/1=float/2=double/3=long double)
 
     if (help)
         handle_help(argv[0]);
 
-    if (strcasestr(ic, "help"))
+    if (strcasestr(ret.ic, "help"))
     {
         handle_ic_help();
         exit(1);
@@ -129,24 +113,26 @@ process_args(int argc, char **argv)
         exit(1);
 
     // Handle possible termination by change threshold criterion
-    if (maxt < 0)
+    if (ret.maxt < 0)
     {
-        min_change = -maxt * -maxt;
-        maxt = INT_MAX;
+        ret.min_change = -ret.maxt * -ret.maxt;
+        ret.maxt = INT_MAX;
     }
 
     // Handle output results dir creation and save of command-line
-    if (access(runame, F_OK) == 0)
+    if (access(ret.runame, F_OK) == 0)
     {
-        fprintf(stderr, "An entry \"%s\" already exists\n", runame);
+        fprintf(stderr, "An entry \"%s\" already exists\n", ret.runame);
         exit(1);
     } 
 
     // Make the output dir and save clargs there too
-    mkdir(runame, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
+    mkdir(ret.runame, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
     char fname[128];
-    sprintf(fname, "%s/clargs.out", runame);
+    sprintf(fname, "%s/clargs.out", ret.runame);
     FILE *outf = fopen(fname, "w");
     fprintf(outf, "%s", clargs);
     fclose(outf);
+
+    return ret;
 }
