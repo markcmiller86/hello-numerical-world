@@ -9,7 +9,7 @@ EXE = heat
 
 # Implicit rule for object files
 %.o : %.C
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+	$(CXX) -c $(CSTD) $(CXXFLAGS) $(CPPFLAGS) $< -o $@
 
 # Help is default target
 help:

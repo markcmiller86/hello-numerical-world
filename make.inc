@@ -5,4 +5,4 @@ RUNAME ?= heat_results
 PIPEWIDTH ?= 0.1
 RM = rm
 
-CXXFLAGS = --std=c++14
+CSTD = --std=c++14
