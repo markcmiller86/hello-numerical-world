@@ -98,4 +98,7 @@ check_dufrank: heat check_dufrank/check_dufrank_soln_final.curve
 	cat check_dufrank/check_dufrank_soln_final.curve
 	./check_lss.sh check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
 
-check_all: check_ftcs check_crankn check_dufrank
+check_help: heat
+	./heat help 2>&1 | grep -i Examples
+
+check_all: check_ftcs check_crankn check_dufrank check_help
