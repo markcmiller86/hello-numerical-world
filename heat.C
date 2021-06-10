@@ -2,19 +2,6 @@
 
 #include "heat.H"
 
-// Various arrays of numerical data
-Number *curr           = 0; // current solution
-Number *back1          = 0; // solution back 1 step
-Number *back2          = 0; // solution back 2 steps
-Number *exact          = 0; // exact solution (when available)
-Number *change_history = 0; // solution l2norm change history
-Number *error_history  = 0; // solution error history (when available)
-Number *cn_Amat        = 0; // A matrix for Crank-Nicholson
-
-// Number of points in space, x, and time, t.
-int Nx;
-int Nt;
-
 extern void
 initialize_crankn(int n,
     Number alpha, Number dx, Number dt,
@@ -24,73 +11,53 @@ extern void
 compute_exact_solution(int n, Number *a, Number dx, char const *ic,
     Number alpha, Number t, Number bc0, Number bc1);
 
-extern bool
-update_solution_ftcs(int n,
-    Number *curr, Number const *back1,
-    Number alpha, Number dx, Number dt,
-    Number bc_0, Number bc_1);
+struct State {
+    Vector curr           ; // current solution
+    Vector back1          ; // solution back 1 step
+    Vector back2          ; // solution back 2 steps
+    Vector exact          ; // exact solution (when available)
+    Vector change_history ; // solution l2norm change history
+    Vector error_history  ; // solution error history (when available)
 
-extern bool
-update_solution_upwind15(int n,
-    Number *curr, Number const *back1,
-    Number alpha, Number dx, Number dt,
-    Number bc_0, Number bc_1);
+    Number *cn_Amat       ; // A matrix for Crank-Nicholson
 
-extern bool
-update_solution_crankn(int n,
-    Number *curr, Number const *back1,
-    Number const *cn_Amat,
-    Number bc_0, Number bc_1);
-
-extern bool
-update_solution_dufrank(int n, Number *curr,
-    Number const *back1, Number const *back2,
-    Number alpha, Number dx, Number dt,
-    Number bc_0, Number bc_1);
-
-static void
-initialize(Args &arg)
-{
-    Nx = (int) round((double)(arg.lenx/arg.dx))+1;
-    Nt = (int) (arg.maxt/arg.dt);
-    arg.dx = arg.lenx/(Nx-1);
-
-    curr  = new Number[Nx]();
-    back1 = new Number[Nx]();
-    if (arg.save)
-    {
-        exact = new Number[Nx]();
-        change_history = new Number[Nx]();
-        error_history = new Number[Nx]();
-    }
-
-    assert(strncmp(arg.alg, "ftcs", 4)==0 ||
-           strncmp(arg.alg, "dufrank", 7)==0 ||
-           strncmp(arg.alg, "crankn", 6)==0);
+    State(Args &arg)
+        : curr(arg.Nx)
+        , back1(arg.Nx)
+        , back2(strncmp(arg.alg, "dufrank", 7)==0 ? arg.Nx : 0)
+        , exact(arg.save ? arg.Nx : 0)
+        , change_history((arg.save && arg.Nt != INT_MAX) ? arg.Nt : 0)
+        , error_history((arg.save && arg.Nt != INT_MAX) ? arg.Nt : 0)
+        , cn_Amat(nullptr)
+        {
+        assert(strncmp(arg.alg, "ftcs", 4)==0 ||
+               strncmp(arg.alg, "dufrank", 7)==0 ||
+               strncmp(arg.alg, "crankn", 6)==0);
 
 #ifdef HAVE_FEENABLEEXCEPT
-    feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
+        feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 #endif
 
-    if (!strncmp(arg.alg, "crankn", 6))
-        initialize_crankn(Nx, arg.alpha, arg.dx, arg.dt, &cn_Amat);
+        if (!strncmp(arg.alg, "crankn", 6))
+            initialize_crankn(arg.Nx, arg.alpha, arg.dx, arg.dt, &cn_Amat);
 
-    if (!strncmp(arg.alg, "dufrank", 7))
-        back2 = new Number[Nx]();
+        /* Initial condition */
+        set_initial_condition(arg, back1);
+    }
+    ~State() {
+        if (cn_Amat != nullptr) delete [] cn_Amat;
+    }
+};
 
-    /* Initial condition */
-    set_initial_condition(arg, Nx, back1);
-}
-
-int finalize(Args &arg, int ti, Number maxt, Number change)
+int finalize(Args &arg, State &s, int ti, Number maxt, Number change)
 {
     int retval = 0;
 
-    write_array(ArrType::TFINAL, arg, Nx, arg.dx, curr);
+    write_array(ArrType::TFINAL, arg, arg.dx, s.curr);
     if (arg.save)
     {
-        write_array(ArrType::RESIDUAL, arg, ti, arg.dt, change_history);
-        write_array(ArrType::ERROR, arg, ti, arg.dt, error_history);
+        write_array(ArrType::RESIDUAL, arg, arg.dt, s.change_history, ti);
+        write_array(ArrType::ERROR, arg, arg.dt, s.error_history, ti);
     }
 
     if (arg.outi)
@@ -98,13 +65,7 @@ int finalize(Args &arg, int ti, Number maxt, Number change)
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
     }
 
-    delete [] curr;
-    delete [] back1;
-    if (back2) delete [] back2;
-    if (exact) delete [] exact;
-    if (change_history) delete [] change_history;
-    if (error_history) delete [] error_history;
-    if (cn_Amat) delete [] cn_Amat;
+    // FIXME: this free-s an unallocated pointer if the user enters ftcs, etc.
     if (strncmp(arg.alg, "ftcs", 4)) free((void*)arg.alg);
     if (strncmp(arg.ic, "const(1)", 8)) free((void*)arg.ic);
 
@@ -112,37 +73,42 @@ int finalize(Args &arg, int ti, Number maxt, Number change)
 }
 
 static bool
-update_solution(Args &arg)
+update_solution(Args &arg, State &s)
 {
     if (!strcmp(arg.alg, "ftcs"))
-        return update_solution_ftcs(Nx, curr, back1, arg.alpha, arg.dx, arg.dt, arg.bc0, arg.bc1);
+        return update_solution_ftcs(arg.Nx, s.curr.data(), s.back1.data(),
+                                    arg.alpha, arg.dx, arg.dt, arg.bc0, arg.bc1);
     else if (!strcmp(arg.alg, "crankn"))
-        return update_solution_crankn(Nx, curr, back1, cn_Amat, arg.bc0, arg.bc1);
+        return update_solution_crankn(arg.Nx, s.curr.data(), s.back1.data(),
+                                      s.cn_Amat, arg.bc0, arg.bc1);
     else if (!strcmp(arg.alg, "dufrank"))
-        return update_solution_dufrank(Nx, curr, back1, back2, arg.alpha, arg.dx, arg.dt, arg.bc0, arg.bc1);
+        return update_solution_dufrank(arg.Nx, s.curr.data(), s.back1.data(),
+                            s.back2.data(), arg.alpha,
+                            arg.dx, arg.dt, arg.bc0, arg.bc1);
     return false;
 }
 
 static Number
-update_output_files(Args &arg, int ti)
+update_output_files(Args &arg, State &s, int ti)
 {
     Number change;
 
     if (ti>0 && arg.save)
     {
-        compute_exact_solution(Nx, exact, arg.dx, arg.ic, arg.alpha, castNum(ti*arg.dt), arg.bc0, arg.bc1);
+        compute_exact_solution(arg.Nx, s.exact.data(), arg.dx,
+                        arg.ic, arg.alpha, castNum(ti*arg.dt), arg.bc0, arg.bc1);
         if (arg.savi && ti%arg.savi==0)
-            write_array(ArrType::EXACT, arg, Nx, arg.dx, exact, ti);
+            write_array(ArrType::EXACT, arg, arg.dx, s.exact, ti);
     }
 
     if (ti>0 && arg.savi && ti%arg.savi==0)
-        write_array(ArrType::STEP, arg, Nx, arg.dx, curr, ti);
+        write_array(ArrType::STEP, arg, arg.dx, s.curr, ti);
 
-    change = l2_norm(Nx, curr, back1);
-    if (arg.save)
+    change = l2_norm(arg.Nx, s.curr.data(), s.back1.data());
+    if (arg.save && ti < s.error_history.size())
     {
-        change_history[ti] = change;
-        error_history[ti] = l2_norm(Nx, curr, exact);
+        s.change_history[ti] = change;
+        s.error_history[ti] = l2_norm(arg.Nx, s.curr.data(), s.exact.data());
     }
 
     return change;
@@ -157,20 +123,20 @@ int main(int argc, char **argv)
     Args arg = process_args(argc, argv);
 
     // Allocate arrays and set initial conditions
-    initialize(arg);
+    State s(arg);
 
     // Iterate to max iterations or solution change is below threshold
     for (ti = 0; ti*arg.dt < arg.maxt; ti++)
     {
         // compute the next solution step
-        if (!update_solution(arg))
+        if (!update_solution(arg, s))
         {
             fprintf(stderr, "Solution criteria violated. Make better choices\n");
             exit(1);
         }
 
         // compute amount of change in solution
-        change = update_output_files(arg, ti);
+        change = update_output_files(arg, s, ti);
 
         // Handle possible termination by change threshold
         if (arg.maxt == INT_MAX && change < arg.min_change)
@@ -185,12 +151,12 @@ int main(int argc, char **argv)
             printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
 
         // Copy current solution to backi
-        if (back2)
-            copy(Nx, back2, back1);
-        copy(Nx, back1, curr);
+        if (s.back2.size() > 0)
+            copy(s.back2, s.back1);
+        copy(s.back1, s.curr);
 
     }
 
     // Delete storage and output final results
-    return finalize(arg, ti, arg.maxt, change);
+    return finalize(arg, s, ti, arg.maxt, change);
 }

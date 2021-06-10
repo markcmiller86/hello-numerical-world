@@ -1,8 +1,5 @@
 #include "heat.H"
 
-extern int Nx;
-extern Number *exact;
-
 // Utilities
 Number
 l2_norm(int n, Number const *a, Number const *b)
@@ -18,16 +15,18 @@ l2_norm(int n, Number const *a, Number const *b)
 }
 
 void
-copy(int n, Number *dst, Number const *src)
+copy(Vector &dst, const Vector &src)
 {
+    assert(dst.size() == src.size());
     int i;
-    for (i = 0; i < n; i++)
+    for (i = 0; i < dst.size(); i++)
         dst[i] = src[i];
 }
 
-void write_array(ArrType t, Args &arg, int n, Number step, Number const *a, int time)
+void write_array(ArrType t, Args &arg, Number step, const Vector &a, int time)
 {
     int i;
+    int n = a.size();
     char fname[128];
     char vname[64];
     FILE *outf;
@@ -46,10 +45,12 @@ void write_array(ArrType t, Args &arg, int n, Number step, Number const *a, int 
     case ArrType::RESIDUAL:
         snprintf(fname, sizeof(fname), "%s/%s_change.curve", arg.runame, arg.runame);
         snprintf(vname, sizeof(vname), "%s/%s_l2_change", arg.runame, arg.runame);
+        n = time < n ? time : n;
         break;
     case ArrType::ERROR:
         snprintf(fname, sizeof(fname), "%s/%s_error.curve", arg.runame, arg.runame);
         snprintf(vname, sizeof(vname), "%s/%s_l2", arg.runame, arg.runame);
+        n = time < n ? time : n;
         break;
     case ArrType::EXACT:
         snprintf(fname, sizeof(fname), "%s/%s_exact_%05d.curve", arg.runame, arg.runame, time);
@@ -81,8 +82,9 @@ void write_array(ArrType t, Args &arg, int n, Number step, Number const *a, int 
     fclose(outf);
 }
 
-void set_initial_condition(Args &arg, int n, Number *a)
+void set_initial_condition(Args &arg, Vector &a)
 {
+    int n = a.size();
     int i;
     double x;
 
@@ -175,5 +177,5 @@ void set_initial_condition(Args &arg, int n, Number *a)
         fclose(icfile);
         free(filename);
     }
-    write_array(ArrType::TSTART, arg, Nx, arg.dx, a);
+    write_array(ArrType::TSTART, arg, arg.dx, a);
 }

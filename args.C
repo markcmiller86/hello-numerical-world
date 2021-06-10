@@ -134,5 +134,10 @@ Args process_args(int argc, char **argv) {
     fprintf(outf, "%s", clargs);
     fclose(outf);
 
+    // final setup on args
+    ret.Nx = (int) round((double)(ret.lenx/ret.dx))+1;
+    ret.Nt = (int) (ret.maxt/ret.dt);
+    ret.dx = ret.lenx/(ret.Nx-1);
+
     return ret;
 }

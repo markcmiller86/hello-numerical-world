@@ -21,3 +21,4 @@
 #include "Half.H"
 #include "Number.H"
 #include "utils.H"
+#include "solutions.H"

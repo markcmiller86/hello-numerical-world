@@ -2,6 +2,10 @@
 
 // Command-line argument variables
 struct Args {
+    // Number of points in space, x, and time, t.
+    int Nx;
+    int Nt;
+
     int noout;
     int savi;
     int outi;
@@ -19,6 +23,7 @@ struct Args {
     Number min_change;
 
     Args() :
+        Nx(0), Nt(0),
         noout        ( 0 ),
         savi         ( 0 ),
         outi         ( 100 ),

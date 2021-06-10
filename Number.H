@@ -1,4 +1,5 @@
 #include <ostream>
+#include <vector>
 
 #include "Half.H"
 
@@ -25,3 +26,26 @@ template <typename T> Number castNum(T x) { return (Number) x; }
 #error UNRECOGNIZED FPTYPE
 #endif
 
+class Vector {
+    std::vector<Number> x;
+    const int n;
+
+    public:
+        Vector(int n_) : x(n_), n(n_) { }
+
+        Number& operator[](int i) {
+            return x[i];
+        }
+        const Number operator[](int i) const {
+            return x[i];
+        }
+        int size() const {
+            return n;
+        }
+        const Number *data() const {
+            return x.data();
+        }
+        Number *data() {
+            return x.data();
+        }
+};
