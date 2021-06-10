@@ -4,8 +4,9 @@
 // Modified: 30 May 2009 Author: John Burkardt
 // Modified by Mark C. Miller, July 23, 2017
 static void
-r83_np_fa(int n, Number *a)
+r83_np_fa(Vector &a)
 {
+    int n = a.size()/3;
     int i;
 
     for ( i = 1; i <= n-1; i++ )
@@ -22,16 +23,15 @@ r83_np_fa(int n, Number *a)
     assert( a[1+(n-1)*3] != 0.0 );
 }
 
-void
+Vector
 initialize_crankn(int n,
-    Number alpha, Number dx, Number dt,
-    Number **_cn_Amat)
+    Number alpha, Number dx, Number dt)
 {
     int i;
     Number const w = alpha * dt / dx / dx;
 
     // Build a tri-diagonal matrix
-    Number *cn_Amat = new Number[3*n]();
+    Vector cn_Amat(3*n);
 
     cn_Amat[0+0*3] = 0.0;
     cn_Amat[1+0*3] = 1.0;
@@ -49,10 +49,9 @@ initialize_crankn(int n,
     cn_Amat[2+(n-1)*3] = 0.0;
 
     // Factor the matrix.
-    r83_np_fa(n, cn_Amat);
+    r83_np_fa(cn_Amat);
 
-    // Return the generated matrix
-    *_cn_Amat = cn_Amat;
+    return cn_Amat;
 }
 
 // Licensing: This code is distributed under the GNU LGPL license. 

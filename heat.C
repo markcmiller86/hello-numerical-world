@@ -2,15 +2,6 @@
 
 #include "heat.H"
 
-extern void
-initialize_crankn(int n,
-    Number alpha, Number dx, Number dt,
-    Number **_cn_Amat);
-
-extern void 
-compute_exact_solution(int n, Number *a, Number dx, char const *ic,
-    Number alpha, Number t, Number bc0, Number bc1);
-
 struct State {
     Vector curr           ; // current solution
     Vector back1          ; // solution back 1 step
@@ -19,7 +10,7 @@ struct State {
     Vector change_history ; // solution l2norm change history
     Vector error_history  ; // solution error history (when available)
 
-    Number *cn_Amat       ; // A matrix for Crank-Nicholson
+    Vector cn_Amat        ; // A matrix for Crank-Nicholson
 
     State(Args &arg)
         : curr(arg.Nx)
@@ -28,7 +19,7 @@ struct State {
         , exact(arg.save ? arg.Nx : 0)
         , change_history((arg.save && arg.Nt != INT_MAX) ? arg.Nt : 0)
         , error_history((arg.save && arg.Nt != INT_MAX) ? arg.Nt : 0)
-        , cn_Amat(nullptr)
+        , cn_Amat(strncmp(arg.alg, "crankn", 6) == 0 ? initialize_crankn(arg.Nx, arg.alpha, arg.dx, arg.dt) : 0)
         {
         assert(strncmp(arg.alg, "ftcs", 4)==0 ||
                strncmp(arg.alg, "dufrank", 7)==0 ||
@@ -38,14 +29,8 @@ struct State {
         feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 #endif
 
-        if (!strncmp(arg.alg, "crankn", 6))
-            initialize_crankn(arg.Nx, arg.alpha, arg.dx, arg.dt, &cn_Amat);
-
         /* Initial condition */
         set_initial_condition(arg, back1);
-    }
-    ~State() {
-        if (cn_Amat != nullptr) delete [] cn_Amat;
     }
 };
 
@@ -80,7 +65,7 @@ update_solution(Args &arg, State &s)
                                     arg.alpha, arg.dx, arg.dt, arg.bc0, arg.bc1);
     else if (!strcmp(arg.alg, "crankn"))
         return update_solution_crankn(arg.Nx, s.curr.data(), s.back1.data(),
-                                      s.cn_Amat, arg.bc0, arg.bc1);
+                                      s.cn_Amat.data(), arg.bc0, arg.bc1);
     else if (!strcmp(arg.alg, "dufrank"))
         return update_solution_dufrank(arg.Nx, s.curr.data(), s.back1.data(),
                             s.back2.data(), arg.alpha,
