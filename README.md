@@ -30,7 +30,9 @@ In this case, the PDE simplifies to...
 |:---:|:---:|
 |![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Cpartial%20u%7D%7B%5Cpartial%20t%7D%20%3D%20%5Calpha%20%5Cfrac%7B%5Cpartial%5E2%20u%7D%7B%5Cpartial%20x%5E2%7D)|(2)|
 
-Currently, three different numerical algorithms are implemented
+From this highly simplified basic problem, there are a number of [extensions](http://hplgit.github.io/num-methods-for-PDEs/doc/pub/diffu/html/._diffu001.html) available for a more in-depth computational science study.
+
+Currently, three different numerical algorithms are implemented here
 
 * [Foward Time Centered Space (FTCS)](https://en.wikipedia.org/wiki/FTCS_scheme), an
 [explicit](https://en.wikipedia.org/wiki/Explicit_and_implicit_methods) method
