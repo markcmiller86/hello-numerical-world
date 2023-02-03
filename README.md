@@ -102,6 +102,18 @@ Examples...
     ./heat dx=0.1 bc0=273 bc1=273 ic="spikes(273,5,373)"
 ```
 
+### Plotting results
+
+There are scripts for running [gnuplot](http://www.gnuplot.info), [matplotlib](https://matplotlib.org) and [VisIt](visit.llnl.gov) to produce curve plots of the results.
+Whatever option you select, the associated tool must be in your path.
+For example, to use `gnuplot`, use the command...
+
+```
+   make PTOOL=gnuplot RUNAME=heat_results plot
+```
+
+Where the `RUNAME` option is the name of the directory/folder containing the results to be plotted.
+
 ### Setting the Initial Condition (`ic=`)
 
 The initial condition argument, `ic=`, handles various cases...
