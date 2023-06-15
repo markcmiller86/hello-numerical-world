@@ -127,3 +127,4 @@ The initial condition argument, `ic=`, handles various cases...
 * **File**, ic="file(foo.dat)" : read initial condition data from the file `foo.dat`.
 
 **Note**: The boundary condition arguments, `bc0=` and `bc1=` must be specified such that they *combine* smoothly with the specified initial condition.
+
