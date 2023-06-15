@@ -126,4 +126,6 @@ The initial condition argument, `ic=`, handles various cases...
 * **Spikes**, `ic="spikes(C,A0,X0,A1,X1,...)"`: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, `x`.
 * **File**, `ic="file(foo.dat)"` : read initial condition data from the file `foo.dat`.
 
+
 **Note**: The boundary condition arguments, `bc0=` and `bc1=` should be specified such that they *combine* smoothly with the specified initial condition.
+
