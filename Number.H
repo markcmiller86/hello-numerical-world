@@ -43,11 +43,16 @@ class Number {
     inline operator double() const { return static_cast<double>(x); };
 #endif
   private:
-    static thread_local int nadds;
-    static thread_local int nmults;
-    static thread_local int ndivs;
-    static thread_local std::size_t nbytes;
+    static int nadds;
+    static int nmults;
+    static int ndivs;
+    static std::size_t nbytes;
     fpnumber x;
+
+    #pragma omp threadprivate(nadds)
+    #pragma omp threadprivate(nmults)
+    #pragma omp threadprivate(ndivs)
+    #pragma omp threadprivate(nbytes)
 
     // Various operators on Number w/mix of int
     friend Number operator+(const Number& lhs, const Number& rhs) {  Number::nadds++; return lhs.x + rhs.x; };

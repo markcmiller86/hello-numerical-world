@@ -3,10 +3,10 @@
 #include "heat.H"
 
 // Number class' statics
-thread_local int         Number::nadds  = 0;
-thread_local int         Number::nmults = 0;
-thread_local int         Number::ndivs  = 0;
-thread_local std::size_t Number::nbytes = 0;
+int         Number::nadds  = 0;
+int         Number::nmults = 0;
+int         Number::ndivs  = 0;
+std::size_t Number::nbytes = 0;
 
 // Command-line argument variables
 int noout        = 0;
