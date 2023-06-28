@@ -117,8 +117,6 @@ initialize(void)
         omp_set_num_threads(nt);
     else
         omp_set_num_threads(1);
-    #pragma omp parallel
-    printf("In MAIN, I am thread %d\n", omp_get_thread_num());
 #endif
 
     if (!strncmp(alg, "crankn", 6))

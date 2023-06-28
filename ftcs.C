@@ -15,7 +15,7 @@ update_solution_ftcs(
     if (r > 0.5) return false; 
 
     // FTCS update algorithm
-    #pragma omp parallel for schedule(static,256)
+    #pragma omp parallel for
     for (int i = 1; i < n-1; i++)
         uk[i] = r*uk1[i+1] + (1-2*r)*uk1[i] + r*uk1[i-1];
 
