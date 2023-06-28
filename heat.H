@@ -16,6 +16,10 @@
 
 #include <sstream>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 // Lets overlook the fact that we're including one
 // header inside of another just for convenience
 #include "Half.H"

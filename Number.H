@@ -43,10 +43,10 @@ class Number {
     inline operator double() const { return static_cast<double>(x); };
 #endif
   private:
-    static int nadds;
-    static int nmults;
-    static int ndivs;
-    static std::size_t nbytes;
+    static thread_local int nadds;
+    static thread_local int nmults;
+    static thread_local int ndivs;
+    static thread_local std::size_t nbytes;
     fpnumber x;
 
     // Various operators on Number w/mix of int

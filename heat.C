@@ -3,16 +3,17 @@
 #include "heat.H"
 
 // Number class' statics
-int         Number::nadds  = 0;
-int         Number::nmults = 0;
-int         Number::ndivs  = 0;
-std::size_t Number::nbytes = 0;
+thread_local int         Number::nadds  = 0;
+thread_local int         Number::nmults = 0;
+thread_local int         Number::ndivs  = 0;
+thread_local std::size_t Number::nbytes = 0;
 
 // Command-line argument variables
 int noout        = 0;
 int savi         = 0;
 int outi         = 100;
 int save         = 0;
+int nt           = 0; // number of parallel tasks
 char const *runame = "heat_results";
 char const *alg  = "ftcs";
 char const *ic   = "const(1)";
@@ -111,13 +112,22 @@ initialize(void)
     feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 #endif
 
+#ifdef _OPENMP
+    if (nt > 1)
+        omp_set_num_threads(nt);
+    else
+        omp_set_num_threads(1);
+    #pragma omp parallel
+    printf("In MAIN, I am thread %d\n", omp_get_thread_num());
+#endif
+
     if (!strncmp(alg, "crankn", 6))
         initialize_crankn(Nx, alpha, dx, dt, &cn_Amat);
 
     if (!strncmp(alg, "dufrank", 7))
         back2 = new Number[Nx]();
 
-    /* Initial condition */
+    // Initial condition
     set_initial_condition(Nx, back1, dx, ic);
 }
 
