@@ -6,6 +6,27 @@
 #define FPTYPE 2
 #endif
 
+#ifdef _OPENMP
+
+// 0=half, 1=float, 2=double, 3=quad
+#if   FPTYPE == 0
+#define Number half_float::half
+typedef half_float::half fpnumber;
+#elif FPTYPE == 1
+#define Number float
+typedef float fpnumber;
+#elif FPTYPE == 2
+#define Number double
+typedef double fpnumber;
+#elif FPTYPE == 3
+#define Number long double
+typedef long double fpnumber;
+#else
+#error UNRECOGNIZED FPTYPE
+#endif
+
+#else
+
 // 0=half, 1=float, 2=double, 3=quad
 #if   FPTYPE == 0
 typedef half_float::half fpnumber;
@@ -19,9 +40,12 @@ typedef long double fpnumber;
 #error UNRECOGNIZED FPTYPE
 #endif
 
+#endif
+
 // Encapsulate a floating point number to easily track various metrics.
 // Note: Doing this well is complicated by the mix of types in numerical
 // statements (e.g. int*double) made explicit by modern compilers.
+#ifndef _OPENMP
 class Number {
   public:
     static void *operator new(std::size_t sz) { Number::nbytes += sz; return ::operator new(sz); };
@@ -114,6 +138,7 @@ class Number {
     friend bool operator!=(const Number& lhs, const double& rhs){ return !(lhs == rhs); }
     friend std::ostream& operator<<(std::ostream& os, const Number& rhs)  { os << rhs.x; return os; }
 };
+#endif
 
 #define TSTART -1
 #define TFINAL -2

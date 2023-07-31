@@ -1,12 +1,15 @@
 #include <cmath>
+#include <sys/time.h>
 
 #include "heat.H"
 
 // Number class' statics
+#ifndef _OPENMP
 int         Number::nadds  = 0;
 int         Number::nmults = 0;
 int         Number::ndivs  = 0;
 std::size_t Number::nbytes = 0;
+#endif
 
 // Command-line argument variables
 int noout        = 0;
@@ -143,7 +146,9 @@ int finalize(int ti, Number maxt, Number change)
     if (outi)
     {
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
+#ifndef _OPENMP
         printf("Counts: %s\n", Number::counts_string());
+#endif
     }
 
     delete [] curr;
@@ -196,9 +201,16 @@ update_output_files(int ti)
     return change;
 }
 
+double getusecs(struct timeval const *tv)
+{
+    return tv->tv_sec * 1.0e+6 + tv->tv_usec;
+}
+ 
 int main(int argc, char **argv)
 {
     int ti;
+    struct timeval tv1, tv2;
+    double t1, t2, tdiff;
     Number change;
 
     // Read command-line args and set values
@@ -208,6 +220,7 @@ int main(int argc, char **argv)
     initialize();
 
     // Iterate to max iterations or solution change is below threshold
+    gettimeofday(&tv1, 0);
     for (ti = 0; ti*dt < maxt; ti++)
     {
         // compute the next solution step
@@ -238,6 +251,11 @@ int main(int argc, char **argv)
         copy(Nx, back1, curr);
 
     }
+    gettimeofday(&tv2, 0);
+    tdiff = getusecs(&tv2) - getusecs(&tv1); /* result is microseconds */
+    tdiff /= 1000.0; /* convert to milliseconds */
+
+    printf("Elapsed time = %8.16g\n\n", tdiff);
 
     // Delete storage and output final results
     return finalize(ti, maxt, change);
