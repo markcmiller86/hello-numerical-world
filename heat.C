@@ -1,5 +1,4 @@
 #include <cmath>
-#include <sys/time.h>
 
 #include "heat.H"
 
@@ -90,6 +89,10 @@ update_solution_dufrank(int n, Number *curr,
     Number const *back1, Number const *back2,
     Number alpha, Number dx, Number dt,
     Number bc_0, Number bc_1);
+
+extern double getWallTimeUsec();
+void updateAvg(double);
+extern double getAvg();
 
 static void
 initialize(void)
@@ -201,15 +204,9 @@ update_output_files(int ti)
     return change;
 }
 
-double getusecs(struct timeval const *tv)
-{
-    return tv->tv_sec * 1.0e+6 + tv->tv_usec;
-}
- 
 int main(int argc, char **argv)
 {
     int ti;
-    struct timeval tv1, tv2;
     double t1, t2, tdiff;
     Number change;
 
@@ -220,15 +217,17 @@ int main(int argc, char **argv)
     initialize();
 
     // Iterate to max iterations or solution change is below threshold
-    gettimeofday(&tv1, 0);
     for (ti = 0; ti*dt < maxt; ti++)
     {
         // compute the next solution step
+        t1 = getWallTimeUsec();
         if (!update_solution())
         {
             fprintf(stderr, "Solution criteria violated. Make better choices\n");
             exit(1);
         }
+        t2 = getWallTimeUsec();
+        updateAvg(t2-t1);
 
         // compute amount of change in solution
         change = update_output_files(ti);
@@ -251,11 +250,7 @@ int main(int argc, char **argv)
         copy(Nx, back1, curr);
 
     }
-    gettimeofday(&tv2, 0);
-    tdiff = getusecs(&tv2) - getusecs(&tv1); /* result is microseconds */
-    tdiff /= 1000.0; /* convert to milliseconds */
-
-    printf("Elapsed time = %8.16g\n\n", tdiff);
+    printf("Average solve time = %8.16g msec\n\n", getAvg() / 1000.0);
 
     // Delete storage and output final results
     return finalize(ti, maxt, change);
