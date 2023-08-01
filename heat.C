@@ -217,17 +217,15 @@ int main(int argc, char **argv)
     initialize();
 
     // Iterate to max iterations or solution change is below threshold
+    t1 = getWallTimeUsec();
     for (ti = 0; ti*dt < maxt; ti++)
     {
         // compute the next solution step
-        t1 = getWallTimeUsec();
         if (!update_solution())
         {
             fprintf(stderr, "Solution criteria violated. Make better choices\n");
             exit(1);
         }
-        t2 = getWallTimeUsec();
-        updateAvg(t2-t1);
 
         // compute amount of change in solution
         change = update_output_files(ti);
@@ -250,7 +248,8 @@ int main(int argc, char **argv)
         copy(Nx, back1, curr);
 
     }
-    printf("Average solve time = %8.16g msec\n\n", getAvg() / 1000.0);
+    t2 = getWallTimeUsec();
+    printf("Elapsed time = %8.16g msec\n\n", (t2 - t1) / 1000.0);
 
     // Delete storage and output final results
     return finalize(ti, maxt, change);
