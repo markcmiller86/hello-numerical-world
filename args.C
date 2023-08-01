@@ -135,6 +135,15 @@ process_args(int argc, char **argv)
     if (help)
         exit(1);
 
+    // Handle possible invalid combination of parallel tasking and algorithm
+#ifdef _OPENMP
+    if (nt > 1 && !strcmp(alg,"crankn"))
+    {
+        fprintf(stderr, "The \"crankn\" algorithm does not yet support parallel\n");
+        exit(1);
+    } 
+#endif 
+
     // Handle possible termination by change threshold criterion
     if (maxt < 0)
     {
