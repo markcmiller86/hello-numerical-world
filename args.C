@@ -61,6 +61,7 @@ extern int savi;
 extern int save;
 extern int outi;
 extern int noout;
+extern int nt;
 int const prec = FPTYPE;
 
 static void handle_help(char const *argv0)
@@ -110,6 +111,12 @@ process_args(int argc, char **argv)
     HANDLE_ARG(runame, char*, %s, name to give run and results dir);
     HANDLE_ARG(ic, char*, %s, initial condition @ t=0: u(x,0) (Kelvin));
     HANDLE_ARG(alg, char*, %s, algorithm ftcs|dufrank|crankn);
+#ifdef _OPENMP
+    HANDLE_ARG(nt, int, %d, number of parallel tasks);
+#else
+    HANDLE_ARG(nt, int, %d, parallel tasking is DISABLED!!);
+    nt = 0;
+#endif
     HANDLE_ARG(savi, int, %d, save every i-th solution step);
     HANDLE_ARG(save, int, %d, save error in every saved solution);
     HANDLE_ARG(outi, int, %d, output progress every i-th solution step);
@@ -127,6 +134,15 @@ process_args(int argc, char **argv)
 
     if (help)
         exit(1);
+
+    // Handle possible invalid combination of parallel tasking and algorithm
+#ifdef _OPENMP
+    if (nt > 1 && !strcmp(alg,"crankn"))
+    {
+        fprintf(stderr, "The \"crankn\" algorithm does not yet support parallel\n");
+        exit(1);
+    } 
+#endif 
 
     // Handle possible termination by change threshold criterion
     if (maxt < 0)

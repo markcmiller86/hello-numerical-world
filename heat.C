@@ -13,6 +13,7 @@ int noout        = 0;
 int savi         = 0;
 int outi         = 100;
 int save         = 0;
+int nt           = 0; // number of parallel tasks
 char const *runame = "heat_results";
 char const *alg  = "ftcs";
 char const *ic   = "const(1)";
@@ -60,7 +61,7 @@ extern void
 process_args(int argc, char **argv);
 
 extern void 
-compute_exact_solution(int n, Number *a, Number dx, char const *ic,
+compute_exact_steady_state_solution(int n, Number *a, Number dx, char const *ic,
     Number alpha, Number t, Number bc0, Number bc1);
 
 extern bool
@@ -87,6 +88,10 @@ update_solution_dufrank(int n, Number *curr,
     Number alpha, Number dx, Number dt,
     Number bc_0, Number bc_1);
 
+extern double getWallTimeUsec();
+void updateAvg(double);
+extern double getAvg();
+
 static void
 initialize(void)
 {
@@ -111,13 +116,20 @@ initialize(void)
     feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 #endif
 
+#ifdef _OPENMP
+    if (nt > 1)
+        omp_set_num_threads(nt);
+    else
+        omp_set_num_threads(1);
+#endif
+
     if (!strncmp(alg, "crankn", 6))
         initialize_crankn(Nx, alpha, dx, dt, &cn_Amat);
 
     if (!strncmp(alg, "dufrank", 7))
         back2 = new Number[Nx]();
 
-    /* Initial condition */
+    // Initial condition
     set_initial_condition(Nx, back1, dx, ic);
 }
 
@@ -135,7 +147,9 @@ int finalize(int ti, Number maxt, Number change)
     if (outi)
     {
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
+#ifndef _OPENMP
         printf("Counts: %s\n", Number::counts_string());
+#endif
     }
 
     delete [] curr;
@@ -170,7 +184,7 @@ update_output_files(int ti)
 
     if (ti>0 && save)
     {
-        compute_exact_solution(Nx, exact, dx, ic, alpha, ti*dt, bc0, bc1);
+        compute_exact_steady_state_solution(Nx, exact, dx, ic, alpha, ti*dt, bc0, bc1);
         if (savi && ti%savi==0)
             write_array(ti, Nx, dx, exact);
     }
@@ -191,6 +205,7 @@ update_output_files(int ti)
 int main(int argc, char **argv)
 {
     int ti;
+    double t1, t2, tdiff;
     Number change;
 
     // Read command-line args and set values
@@ -200,6 +215,7 @@ int main(int argc, char **argv)
     initialize();
 
     // Iterate to max iterations or solution change is below threshold
+    t1 = getWallTimeUsec();
     for (ti = 0; ti*dt < maxt; ti++)
     {
         // compute the next solution step
@@ -230,6 +246,8 @@ int main(int argc, char **argv)
         copy(Nx, back1, curr);
 
     }
+    t2 = getWallTimeUsec();
+    printf("Elapsed time = %8.16g msec\n\n", (t2 - t1) / 1000.0);
 
     // Delete storage and output final results
     return finalize(ti, maxt, change);

@@ -1,4 +1,9 @@
 # ./heat alpha=8.2e-10 lenx=0.25 dx=0.01 dt=100 maxt=5580000 outi=100 savi=1000 bc0=233.15 bc1=294.261 ic="const(294.261)"
+# make CXX=clang CXXFLAGS=-fopenmp LDFLAGS="-lomp -lstdc++" heat
+# macOS...
+# https://mac.r-project.org/openmp/
+# make CXX=clang CXXFLAGS="-Xclang -fopenmp -I/Users/miller86/ideas-ecp/hello-numerical-world/omp/include" LDFLAGS="-lomp -lstdc++" heat
+# had to copy libomp.dylib to /usr/local/lib
 ERRBND ?= 1e-6
 PTOOL ?= visit
 RUNAME ?= heat_results
@@ -19,6 +24,7 @@ EXE = heat
 help:
 	@echo "Targets:"
 	@echo "    heat: makes the default heat application (double precision)"
+	@echo "    heat-omp: makes default heat application with openmp threads"
 	@echo "    heat-half: makes the heat application with half precision" 
 	@echo "    heat-single: makes the heat application with single precision" 
 	@echo "    heat-double: makes the heat application with double precision" 
@@ -31,12 +37,19 @@ help:
 heat: $(OBJ)
 	$(CXX) -o heat $(OBJ) $(LDFLAGS) -lm
 
+heat-omp: CXX=clang
+heat-omp: CXXFLAGS=-fopenmp
+heat-omp: LDFLAGS=-lomp -lstdc++
+heat-omp: $(OBJ)
+heat-omp: heat
+	mv heat heat-omp
+
 # All objects depend on header
 $(OBJ): $(HDR)
 
 # Convenience variable/target for half-precision
-heat-half : CPPFLAGS=-DFPTYPE=0
-heat-half : $(OBJ)
+heat-half: CPPFLAGS=-DFPTYPE=0
+heat-half: $(OBJ)
 heat-half: heat
 	mv heat heat-half
 
@@ -67,7 +80,7 @@ plot:
 
 check_clean:
 	$(RM) -rf check check_crankn check_dufrank
-	$(RM) -rf heat heat-half heat-single heat-double heat-long-double
+	$(RM) -rf heat heat-omp heat-half heat-single heat-double heat-long-double
 
 clean: check_clean
 	$(RM) -f $(OBJ) $(EXE) $(GCOV)

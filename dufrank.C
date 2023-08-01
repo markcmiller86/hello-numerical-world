@@ -14,6 +14,7 @@ update_solution_dufrank(
     Number q = 1 / (1+r);
 
     // FTCS update algorithm
+    #pragma omp parallel for
     for (int i = 1; i < n-1; i++)
         uk[i] = q * (1-r) * uk2[i] + q * r * (uk1[i+1] + uk1[i-1]);
 

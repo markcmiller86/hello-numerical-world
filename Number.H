@@ -49,6 +49,11 @@ class Number {
     static std::size_t nbytes;
     fpnumber x;
 
+    #pragma omp threadprivate(nadds)
+    #pragma omp threadprivate(nmults)
+    #pragma omp threadprivate(ndivs)
+    #pragma omp threadprivate(nbytes)
+
     // Various operators on Number w/mix of int
     friend Number operator+(const Number& lhs, const Number& rhs) {  Number::nadds++; return lhs.x + rhs.x; };
     friend Number operator+(const int& lhs, const Number& rhs) {  Number::nadds++; return lhs + rhs.x; };

@@ -11,6 +11,7 @@ l2_norm(int n, Number const *a, Number const *b)
 {
     int i;
     Number sum = 0;
+    #pragma omp parallel for reduction(+:sum)
     for (i = 0; i < n; i++)
     {
         Number diff = a[i] - b[i];
@@ -23,6 +24,7 @@ void
 copy(int n, Number *dst, Number const *src)
 {
     int i;
+    #pragma omp parallel for
     for (i = 0; i < n; i++)
         dst[i] = src[i];
 }
@@ -188,3 +190,23 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
     }
     write_array(TSTART, Nx, dx, a);
 }
+
+double getWallTimeUsec()
+{
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_sec * 1.0e+6 + tv.tv_usec;
+}
+
+static double avg = 0.0;
+void updateAvg(double val)
+{
+    static size_t n = 1;
+
+    avg -= avg / n;
+    avg += val / n;
+
+    n++;
+}
+
+double getAvg() { return avg; }
