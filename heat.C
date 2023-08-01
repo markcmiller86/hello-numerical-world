@@ -64,7 +64,7 @@ extern void
 process_args(int argc, char **argv);
 
 extern void 
-compute_exact_solution(int n, Number *a, Number dx, char const *ic,
+compute_exact_steady_state_solution(int n, Number *a, Number dx, char const *ic,
     Number alpha, Number t, Number bc0, Number bc1);
 
 extern bool
@@ -183,7 +183,7 @@ update_output_files(int ti)
 
     if (ti>0 && save)
     {
-        compute_exact_solution(Nx, exact, dx, ic, alpha, ti*dt, bc0, bc1);
+        compute_exact_steady_state_solution(Nx, exact, dx, ic, alpha, ti*dt, bc0, bc1);
         if (savi && ti%savi==0)
             write_array(ti, Nx, dx, exact);
     }

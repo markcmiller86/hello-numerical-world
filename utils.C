@@ -11,6 +11,7 @@ l2_norm(int n, Number const *a, Number const *b)
 {
     int i;
     Number sum = 0;
+    #pragma omp parallel for reduction(+:sum)
     for (i = 0; i < n; i++)
     {
         Number diff = a[i] - b[i];
@@ -23,6 +24,7 @@ void
 copy(int n, Number *dst, Number const *src)
 {
     int i;
+    #pragma omp parallel for
     for (i = 0; i < n; i++)
         dst[i] = src[i];
 }
