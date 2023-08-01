@@ -62,6 +62,7 @@ will output help about available make targets.
 ```
 Targets:
     heat: makes the default heat application (double precision)
+    heat-omp: makes heat with OpenMP parallel threading (double precision)
     heat-half: makes the heat application with half precision
     heat-single: makes the heat application with single precision
     heat-double: makes the heat application with double precision
