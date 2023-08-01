@@ -190,3 +190,23 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
     }
     write_array(TSTART, Nx, dx, a);
 }
+
+double getWallTimeUsec()
+{
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_sec * 1.0e+6 + tv.tv_usec;
+}
+
+static double avg = 0.0;
+void updateAvg(double val)
+{
+    static size_t n = 1;
+
+    avg -= avg / n;
+    avg += val / n;
+
+    n++;
+}
+
+double getAvg() { return avg; }
