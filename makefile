@@ -80,7 +80,7 @@ plot:
 
 check_clean:
 	$(RM) -rf check check_crankn check_dufrank
-	$(RM) -rf heat heat-half heat-single heat-double heat-long-double
+	$(RM) -rf heat heat-omp heat-half heat-single heat-double heat-long-double
 
 clean: check_clean
 	$(RM) -f $(OBJ) $(EXE) $(GCOV)
