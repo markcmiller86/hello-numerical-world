@@ -105,7 +105,7 @@ Examples...
 
 ### Plotting results
 
-There are scripts for running [gnuplot](http://www.gnuplot.info), [matplotlib](https://matplotlib.org) and [VisIt](visit.llnl.gov) to produce curve plots of the results.
+There are scripts for running [gnuplot](http://www.gnuplot.info), [matplotlib](https://matplotlib.org) and [VisIt](https://visit.llnl.gov) to produce curve plots of the results.
 Whatever option you select, the associated tool must be in your path.
 For example, to use `gnuplot`, use the command...
 
