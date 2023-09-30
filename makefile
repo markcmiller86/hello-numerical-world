@@ -3,6 +3,7 @@
 # macOS...
 # https://mac.r-project.org/openmp/
 # make CXX=clang CXXFLAGS="-Xclang -fopenmp -I/Users/miller86/ideas-ecp/hello-numerical-world/omp/include" LDFLAGS="-lomp -lstdc++" heat
+# make CXXFLAGS="-Xpreprocessor -fopenmp" CPPFLAGS=-DFPTYPE=0 LDFLAGS=-lomp ERRBND=1e-1 check_all
 # had to copy libomp.dylib to /usr/local/lib
 ERRBND ?= 1e-6
 PTOOL ?= visit
