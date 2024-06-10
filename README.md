@@ -130,5 +130,7 @@ The initial condition argument, `ic=`, handles various cases...
 
 **Note**: The boundary condition arguments, `bc0=` and `bc1=` should be specified such that they *combine* smoothly with the specified initial condition.
 
+
 **Jose** was here: josee1031.
+@remontel was here
 
