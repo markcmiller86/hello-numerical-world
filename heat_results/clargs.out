@@ -1,0 +1,16 @@
+    alpha=0.2
+    lenx=1
+    dx=0.1
+    dt=0.004
+    maxt=2
+    bc0=0
+    bc1=1
+    runame="heat_results"
+    ic="const(1)"
+    alg="ftcs"
+    nt=0
+    savi=0
+    save=0
+    outi=100
+    noout=0
+    prec=2

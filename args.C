@@ -161,7 +161,7 @@ process_args(int argc, char **argv)
     // Make the output dir and save clargs there too
     mkdir(runame, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
     char fname[128];
-    sprintf(fname, "%s/clargs.out", runame);
+    snprintf(fname,sizeof(fname), "%s/clargs.out", runame);
     FILE *outf = fopen(fname, "w");
     fprintf(outf, "%s", clargs);
     fclose(outf);
