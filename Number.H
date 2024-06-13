@@ -27,7 +27,7 @@ class Number {
     static void *operator new(std::size_t sz) { Number::nbytes += sz; return ::operator new(sz); };
     static void *operator new[](std::size_t sz) { Number::nbytes += sz; return ::operator new(sz); };
     static char const *counts_string() { static char counts[256];
-        sprintf(counts, "Adds:%d, Mults:%d, Divs:%d, Bytes:%d", Number::nadds, Number::nmults, Number::ndivs, (int) Number::nbytes);
+        snprintf(counts, sizeof(counts), "Adds:%d, Mults:%d, Divs:%d, Bytes:%d", Number::nadds, Number::nmults, Number::ndivs, (int) Number::nbytes);
         return counts; };
     inline Number() : x(0) {};
     inline Number(fpnumber _x) : x(_x) {};
