@@ -23,8 +23,8 @@ with open("$1/$1_soln_final.curve") as f:
         words = line.split()
         if '#' in words[0:2]:
             continue
-        x.append(words[0])
-        y.append(words[1])
+        x.append(float(words[0]))
+        y.append(float(words[1]))
 plt.xlabel('Distance (meters)')
 plt.ylabel('Temperature (Kelvin)')
 plt.plot(x,y)
