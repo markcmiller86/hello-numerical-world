@@ -30,7 +30,7 @@ cd {{ site.handson_root }}/hand_coded_heat
 
 Will my pipes freeze during a long, cold storm?
 
-![Wall and Pipe::](assets/wall_and_pipe.png){:width="500px"}
+![Wall and Pipe::](wall_and_pipe.png){:width="500px"}
 
 You keep the inside temperature of the house always at 70 degrees F. But, there is an
 overnight storm coming. The outside temperature is expected to drop to -40 degrees F for 15.5
@@ -86,10 +86,18 @@ the next time, _k+1_, from temperatures at the current time, _k_, as
 $$u_i^{k+1} = ru_{i+1}^k+(1-2r)u_i^k+ru_{i-1}^k$$
 
 where \\( r=\alpha\frac{\Delta t}{\Delta x^2} \\)
+
+
+
 ---
 
 ## Exercise #1: Implement FTCS
 
+```
+% ls
+args.C    crankn.C  ftcs.C  heat.C  makefile  tools       utils.C
+check.sh  exact.C   Half.H  heat.H  Number.H  upwind15.C
+```
 
 The function, `solution_update_ftcs`, is defined in `ftcs.C` without its body.
 
@@ -108,6 +116,7 @@ solution_update_ftcs(
 
 ```
 
+
 ```
 
 ```
@@ -125,14 +134,16 @@ make heat
 #### A note on getting help
 
 ```
-
+% make
 ```
 without any target specified will display a set of convenient make targets.
 
 
 
 ```
+% ./heat --help
 ```
+
 
 
 
@@ -190,6 +201,7 @@ Before we use our new application to solve our simple science question, how can 
 ourselves that the code we have written is not somehow seriously broken?
 
 
+
 We know, maybe even intuitively, that if we maintain constant temperatures at
 $$A @ x=0$$ and $$B @ x=L_x$$, then after a long time (e.g. when the solution
 reaches _[steady state](https://en.wikipedia.org/wiki/Steady_state)_), we
@@ -234,8 +246,7 @@ make plot PTOOL=gnuplot RUNAME=wall
 
 Depending on your situation, the above command may or may not produce a plot looking like below.
 
-![Pipe Solution ::](assets/pipe_solution.png){:width="400"}
-
+![Pipe Solution ::](pipe_solution.png){:width="400"}
 
 
 ## Challenges with Custom Coding
@@ -298,9 +309,6 @@ days to respond but we would be happy to follow up.
 ### Short / Quick Follow-on Questions
 
 
-
-
-
 ### Are the assumptions correct?
 
 A common pitfal in numerical modeling is neglecting to ensure fundamental
@@ -309,9 +317,10 @@ a short lesson, we made a number of *simplifying assumptions*. If the picture
 below was a more accurate representation of the situation, the wall is
 composed more of water (in the pipe) than it is of wall
 
-![Wall and Pipe::](assets/wall_and_pipe2.png){:width="400px"}
+![Wall and Pipe::](wall_and_pipe2.png){:width="400px"}
 
 and our numerical model would fail.
+
 
 
 ### Determine Optimum Wall Thicknesses
@@ -370,7 +379,7 @@ activity name _Crank-Nicholson_ and upload evidence of your completed solution.
 
 ### Use The Application to Solve The Pipeline Problem
 
-![Pipeline Problem::](assets/pipeline.png){:width="500"}
+![Pipeline Problem::](pipeline.png){:width="500"}
 
 An pipeline carrying Ethenol-85 (E85) runs between a manure processing
 facility and a kerosene production factory. In the unlikely event that
