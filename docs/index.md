@@ -87,23 +87,16 @@ $$u_i^{k+1} = ru_{i+1}^k+(1-2r)u_i^k+ru_{i-1}^k$$
 
 where \\( r=\alpha\frac{\Delta t}{\Delta x^2} \\)
 
-{% include qanda
-    question='Is there anything in this numerical treatment that feels like a _mesh_?'
-    answer='
-In the process of discretizing the PDE, we have defined a fixed spacing in x
-and a fixed spacing in t as shown in the figure here
+### include qanda
+* **Question**: Is there anything in this numerical treatment that feels like a _mesh_?
+* **Answer**: In the process of discretizing the PDE, we have defined a fixed spacing in x
+  and a fixed spacing in t as shown in the figure here
 
-[<img src="assets/heat_mesh.png" width="320">](heat_mesh.png){:align="middle"}
+  [<img src="assets/heat_mesh.png" width="320">](heat_mesh.png){:align="middle"}
 
-This is essentially a uniform mesh. Later lessons
-here address more sophisticated discretizations in space and in time which
-depart from these often inflexible fixed spacings.
-                                                                          
-                                                                          
-                                                                          
-                                                                          
-                                                                          
-' %}
+  This is essentially a uniform mesh. Later lessons
+  here address more sophisticated discretizations in space and in time which
+  depart from these often inflexible fixed spacings.
 
 ---
 
@@ -129,38 +122,27 @@ solution_update_ftcs(
     Number bc_0,        // boundary condition @ x=0
     Number bc_1         // boundary condition @ x=Lx
 )
-{
 ```
-{% include qanda
-    question='Using eq. 5, implement the body of this function'
-    answer='
-```
-    Number const r = alpha * dt / (dx * dx);
+### Q and A 
 
-    // Sanity check for stability
-    if (r > 0.5) return false;
+* **Question**: Using eq. 5, implement the body of this function
+* **Answer:**:
+  ```
+      Number const r = alpha * dt / (dx * dx);
 
-    // Update the solution using FTCS algorithm
-    for (int i = 1; i < n-1; i++)
-        uk1[i] = r*uk0[i+1] + (1-2*r)*uk0[i] + r*uk0[i-1];
+      // Sanity check for stability
+      if (r > 0.5) return false;
 
-    // Impose boundary conditions for solution indices 0 & n-1
-    uk1[0  ] = bc0;
-    uk1[n-1] = bc1;
+      // Update the solution using FTCS algorithm
+      for (int i = 1; i < n-1; i++)
+          uk1[i] = r*uk0[i+1] + (1-2*r)*uk0[i] + r*uk0[i-1];
 
-    return true;
-```
-                                                                      
-                                                                      
-                                                                      
-                                                                      
-                                                                      
-                                                                      
-' %}
+      // Impose boundary conditions for solution indices 0 & n-1
+      uk1[0  ] = bc0;
+      uk1[n-1] = bc1;
 
-```
-}
-```
+      return true;
+  ```
 
 Edit `ftcs.C` and implement the FTCS numerical algorithm by coding the body of this function.
 
@@ -178,9 +160,7 @@ make heat
 % make
 ```
 without any target specified will display a set of convenient make targets.
-{% include qanda
-    question='Show make output'
-    answer='
+
 ```
 Targets:
     heat: makes the default heat application (double precision)
@@ -191,16 +171,9 @@ Targets:
     PTOOL=[gnuplot,matplotlib,visit] RUNAME=<run-dir-name> plot: plots results
     check: runs various tests confirming steady-state is linear
 ```
-' %}
-
 
 ```
 % ./heat --help
-```
-{% include qanda
-    question='Show help output'
-    answer='
-```
 Usage: ./heat <arg>=<value> <arg>=<value>...
     runame="heat_results"               name to give run and results dir (char*)
     alpha=0.2         material thermal diffusivity (sq-meters/second) (fpnumber)
@@ -221,11 +194,9 @@ Examples...
     ./heat dx=0.01 dt=0.0002 alg=ftcs
     ./heat dx=0.1 bc0=273 bc1=273 ic="spikes(273,5,373)"
 ```
-' %}
 
-{% include qanda
-    question='About the initial condition (ic) argument...'
-    answer='
+### About the initial condition (ic) argument...
+
 The initial condition argument, `ic`, handles a few interesting cases
 
 Constant, `ic="const(V)"`
@@ -251,24 +222,11 @@ Sin, `ic="sin(Pi*x)"`
 Spikes, `ic="spikes(C,A0,X0,A1,X1,...)"`
 
 : Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, x.
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-
-' %}
 
 
 #### Default Run
 Run the application with default arguments (e.g. don't specify any) and see what happens...
 
-{% include qanda
-    question='Default run output'
-    answer='
 ```
 % ./heat
     runame="heat_results"
@@ -299,15 +257,6 @@ Before running, the application dumps its command-line arguments so the user can
 see what parameters it was run with. In this case, you are seeing the default
 values. It then runs the problem as defined by the command-line arguments and
 saves result files, as needed, to the directory specified by the `runame=` argument.
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-
-' %}
 
 #### Understanding the output and results
 
@@ -356,15 +305,13 @@ _time_ of the solution data stored therein.
 Before we use our new application to solve our simple science question, how can we assure
 ourselves that the code we have written is not somehow seriously broken?
 
-{% include qanda
-    question='Can you think ways to sanity check the our code?'
-    answer='
+### Can you think ways to sanity check the our code?
+
 * Compare it to known, validated numerical solutions.
 * Compare it to known analytical solutions.
 * Confirm its behavior at steady state.
 
 In any case, think about how you would measure _error_.
-' %}
 
 We know, maybe even intuitively, that if we maintain constant temperatures at
 $$A @ x=0$$ and $$B @ x=L_x$$, then after a long time (e.g. when the solution
@@ -375,20 +322,21 @@ below.
 
 ![Evolution Towards Steady State ::](Heat_Transfer.gif)
 
-{% include qanda
-    question='Construct a suitable command-line to easily confirm a linear steady state'
-    answer='Since the default length is 1 and the default boundary conditions are 0 and 1,
-            we just need to run the problem for a long time. But, to be a little more
-            thorough, it is even better to start with a random initial condition too.
+### Construct a suitable command-line to easily confirm a linear steady state'
+
+Since the default length is 1 and the default boundary conditions are 0 and 1,
+we just need to run the problem for a long time. But, to be a little more
+thorough, it is even better to start with a random initial condition too.
+
 ```
 % ./heat dx=0.25 maxt=100 ic="rand(125489,100,50)" runame=test
 ```
-' %}
 
-{% include qanda
-    question='How do you confirm results after a long time are a linear steady state?'
-    answer='Examine the initial and final results file and confirm even a random input
-            still yields a final result where $$u=x_{i}$$ for all rows of the results file
+### How do you confirm results after a long time are a linear steady state?'
+
+Examine the initial and final results file and confirm even a random input
+still yields a final result where $$u=x_{i}$$ for all rows of the results file
+
 ```
 % cat test/test_soln_00000.curve
 # Temperature
@@ -405,14 +353,6 @@ below.
     0.75     0.75
        1        1
 ```
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-' %}
-
 
 ## Exercise #3: Use Applicaton to Do Some Science 
 
@@ -433,9 +373,9 @@ Back to our original problem...will our water pipes freeze?
 **Note:** An all too common issue in simulation applications is being sure data is
 input in the correct units. Take care!
 
-{% include qanda
-   question='Determine the command-line to run for our simple science problem?'
-   answer='./heat runame=wall alpha=8.2e-8 lenx=0.25 dx=0.01 dt=100 outi=100 savi=1000 maxt=55800 bc0=233.15 bc1=294.261 ic="const(294.261)"' %}
+### Determine the command-line to run for our simple science problem?'
+
+Run `./heat runame=wall alpha=8.2e-8 lenx=0.25 dx=0.01 dt=100 outi=100 savi=1000 maxt=55800 bc0=233.15 bc1=294.261 ic="const(294.261)"`
 
 ## Exercise #4: Analyze Results and Do Some Science
 
@@ -450,9 +390,9 @@ Depending on your situation, the above command may or may not produce a plot loo
 
 ![Pipe Solution ::](assets/pipe_solution.png){:width="400"}
 
-{% include qanda
-   question='Will the pipes freeze?'
-   answer='No' %}
+### Will the pipes freeze?
+
+No.
 
 ## Challenges with Custom Coding
 
@@ -513,13 +453,12 @@ days to respond but we would be happy to follow up.
 
 ### Short / Quick Follow-on Questions
 
-{% include qanda
-   question='Will the pipes freeze in a common brick wall of same thickness?'
-   answer='Yes' %}
+### Will the pipes freeze in a common brick wall of same thickness?'
 
-{% include qanda
-   question='What is the Optimum thickness of an Adobe Brick Wall?'
-   answer='0.3-0.4 meters' %}
+Yes.
+
+### What is the Optimum thickness of an Adobe Brick Wall?
+About 0.3-0.4 meters'
 
 ### Are the assumptions correct?
 
@@ -533,9 +472,9 @@ composed more of water (in the pipe) than it is of wall
 
 and our numerical model would fail.
 
-{% include qanda
-   question='Did this in fact happen in our example, above?'
-   answer='Maybe. Certainly the pipe is wider than the original picture suggests.' %}
+### Did this in fact happen in our example, above?
+
+Maybe. Certainly the pipe is wider than the original picture suggests.
 
 ### Determine Optimum Wall Thicknesses
 
