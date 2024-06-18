@@ -202,7 +202,6 @@ below.
 
 
 
-
 ## Exercise #3: Use Applicaton to Do Some Science 
 
 Back to our original problem...will our water pipes freeze?
