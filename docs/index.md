@@ -86,34 +86,10 @@ the next time, _k+1_, from temperatures at the current time, _k_, as
 $$u_i^{k+1} = ru_{i+1}^k+(1-2r)u_i^k+ru_{i-1}^k$$
 
 where \\( r=\alpha\frac{\Delta t}{\Delta x^2} \\)
-
-{% include qanda
-    question='Is there anything in this numerical treatment that feels like a _mesh_?'
-    answer='
-In the process of discretizing the PDE, we have defined a fixed spacing in x
-and a fixed spacing in t as shown in the figure here
-
-[<img src="assets/heat_mesh.png" width="320">](heat_mesh.png){:align="middle"}
-
-This is essentially a uniform mesh. Later lessons
-here address more sophisticated discretizations in space and in time which
-depart from these often inflexible fixed spacings.
-                                                                          
-                                                                          
-                                                                          
-                                                                          
-                                                                          
-' %}
-
 ---
 
 ## Exercise #1: Implement FTCS
 
-```
-% ls
-args.C    crankn.C  ftcs.C  heat.C  makefile  tools       utils.C
-check.sh  exact.C   Half.H  heat.H  Number.H  upwind15.C
-```
 
 The function, `solution_update_ftcs`, is defined in `ftcs.C` without its body.
 
@@ -129,37 +105,11 @@ solution_update_ftcs(
     Number bc_0,        // boundary condition @ x=0
     Number bc_1         // boundary condition @ x=Lx
 )
-{
-```
-{% include qanda
-    question='Using eq. 5, implement the body of this function'
-    answer='
-```
-    Number const r = alpha * dt / (dx * dx);
-
-    // Sanity check for stability
-    if (r > 0.5) return false;
-
-    // Update the solution using FTCS algorithm
-    for (int i = 1; i < n-1; i++)
-        uk1[i] = r*uk0[i+1] + (1-2*r)*uk0[i] + r*uk0[i-1];
-
-    // Impose boundary conditions for solution indices 0 & n-1
-    uk1[0  ] = bc0;
-    uk1[n-1] = bc1;
-
-    return true;
-```
-                                                                      
-                                                                      
-                                                                      
-                                                                      
-                                                                      
-                                                                      
-' %}
 
 ```
-}
+
+```
+
 ```
 
 Edit `ftcs.C` and implement the FTCS numerical algorithm by coding the body of this function.
@@ -175,139 +125,22 @@ make heat
 #### A note on getting help
 
 ```
-% make
+
 ```
 without any target specified will display a set of convenient make targets.
-{% include qanda
-    question='Show make output'
-    answer='
-```
-Targets:
-    heat: makes the default heat application (double precision)
-    heat-half: makes the heat application with half precision
-    heat-single: makes the heat application with single precision
-    heat-double: makes the heat application with double precision
-    heat-long-double: makes the heat application with long-double precision
-    PTOOL=[gnuplot,matplotlib,visit] RUNAME=<run-dir-name> plot: plots results
-    check: runs various tests confirming steady-state is linear
-```
-' %}
+
 
 
 ```
-% ./heat --help
 ```
-{% include qanda
-    question='Show help output'
-    answer='
-```
-Usage: ./heat <arg>=<value> <arg>=<value>...
-    runame="heat_results"               name to give run and results dir (char*)
-    alpha=0.2         material thermal diffusivity (sq-meters/second) (fpnumber)
-    lenx=1                                   material length (meters) (fpnumber)
-    dx=0.1                x-incriment. Best if lenx/dx==int. (meters) (fpnumber)
-    dt=0.004                                    t-incriment (seconds) (fpnumber)
-    maxt=2       >0:max sim time (seconds) | <0:min l2 change in soln (fpnumber)
-    bc0=0                   boundary condition @ x=0: u(0,t) (Kelvin) (fpnumber)
-    bc1=1             boundary condition @ x=lenx: u(lenx,t) (Kelvin) (fpnumber)
-    ic="const(1)"               initial condition @ t=0: u(x,0) (Kelvin) (char*)
-    alg="ftcs"                            algorithm ftcs|upwind15|crankn (char*)
-    savi=0                                   save every i-th solution step (int)
-    save=0                              save error in every saved solution (int)
-    outi=100                      output progress every i-th solution step (int)
-    noout=0                                       disable all file outputs (int)
-    prec=2           precision 0=half/1=float/2=double/3=long double (int const)
-Examples...
-    ./heat dx=0.01 dt=0.0002 alg=ftcs
-    ./heat dx=0.1 bc0=273 bc1=273 ic="spikes(273,5,373)"
-```
-' %}
 
-{% include qanda
-    question='About the initial condition (ic) argument...'
-    answer='
-The initial condition argument, `ic`, handles a few interesting cases
 
-Constant, `ic="const(V)"`
-
-: Set initial condition to constant value, `V`
-
-Ramp, `ic="ramp(L,R)"`
-
-: Set initial condition to a linear ramp having value `L` @ x=0 and `R` @ x=$$L_x$$.
-
-Step, `ic="step(L,Mx,R)"`
-
-: Set initial condition to a step function having value `L` for all x<Mx and value `R` for all x>=Mx.
-
-Random, `ic="rand(S,B,A)"`
-
-: Set initial condition to random values in the range [B-A,B+A] using seed value `S`.
-
-Sin, `ic="sin(Pi*x)"`
-
-: Set initial condition to $$sin(\pi x)$$.
-
-Spikes, `ic="spikes(C,A0,X0,A1,X1,...)"`
-
-: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, x.
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-                                                                               
-
-' %}
 
 
 #### Default Run
 Run the application with default arguments (e.g. don't specify any) and see what happens...
 
-{% include qanda
-    question='Default run output'
-    answer='
-```
-% ./heat
-    runame="heat_results"
-    prec="double"
-    alpha=0.2
-    lenx=1
-    dx=0.1
-    dt=0.004
-    maxt=2
-    bc0=0
-    bc1=1
-    ic="const(1)"
-    alg="ftcs"
-    savi=0
-    save=0
-    outi=100
-    noout=0
-Iteration 0000: last change l2=0.0909091
-Iteration 0100: last change l2=2.42918e-06
-Iteration 0200: last change l2=4.86446e-07
-Iteration 0300: last change l2=1.00929e-07
-Iteration 0400: last change l2=2.09483e-08
-Iteration 0500: last change l2=4.41684e-09
-Counts: Adds:24500, Mults:25001, Divs:1005, Bytes:176
-```
 
-Before running, the application dumps its command-line arguments so the user can
-see what parameters it was run with. In this case, you are seeing the default
-values. It then runs the problem as defined by the command-line arguments and
-saves result files, as needed, to the directory specified by the `runame=` argument.
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-
-' %}
 
 #### Understanding the output and results
 
@@ -356,15 +189,6 @@ _time_ of the solution data stored therein.
 Before we use our new application to solve our simple science question, how can we assure
 ourselves that the code we have written is not somehow seriously broken?
 
-{% include qanda
-    question='Can you think ways to sanity check the our code?'
-    answer='
-* Compare it to known, validated numerical solutions.
-* Compare it to known analytical solutions.
-* Confirm its behavior at steady state.
-
-In any case, think about how you would measure _error_.
-' %}
 
 We know, maybe even intuitively, that if we maintain constant temperatures at
 $$A @ x=0$$ and $$B @ x=L_x$$, then after a long time (e.g. when the solution
@@ -375,43 +199,8 @@ below.
 
 ![Evolution Towards Steady State ::](Heat_Transfer.gif)
 
-{% include qanda
-    question='Construct a suitable command-line to easily confirm a linear steady state'
-    answer='Since the default length is 1 and the default boundary conditions are 0 and 1,
-            we just need to run the problem for a long time. But, to be a little more
-            thorough, it is even better to start with a random initial condition too.
-```
-% ./heat dx=0.25 maxt=100 ic="rand(125489,100,50)" runame=test
-```
-' %}
 
-{% include qanda
-    question='How do you confirm results after a long time are a linear steady state?'
-    answer='Examine the initial and final results file and confirm even a random input
-            still yields a final result where $$u=x_{i}$$ for all rows of the results file
-```
-% cat test/test_soln_00000.curve
-# Temperature
-       0    69.09
-    0.25    143.6
-     0.5     96.3
-    0.75    52.61
-       1    131.6
-% cat test/test_soln_final.curve
-# Temperature
-       0        0
-    0.25     0.25
-     0.5      0.5
-    0.75     0.75
-       1        1
-```
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-' %}
+
 
 
 ## Exercise #3: Use Applicaton to Do Some Science 
@@ -433,9 +222,7 @@ Back to our original problem...will our water pipes freeze?
 **Note:** An all too common issue in simulation applications is being sure data is
 input in the correct units. Take care!
 
-{% include qanda
-   question='Determine the command-line to run for our simple science problem?'
-   answer='./heat runame=wall alpha=8.2e-8 lenx=0.25 dx=0.01 dt=100 outi=100 savi=1000 maxt=55800 bc0=233.15 bc1=294.261 ic="const(294.261)"' %}
+
 
 ## Exercise #4: Analyze Results and Do Some Science
 
@@ -450,9 +237,7 @@ Depending on your situation, the above command may or may not produce a plot loo
 
 ![Pipe Solution ::](assets/pipe_solution.png){:width="400"}
 
-{% include qanda
-   question='Will the pipes freeze?'
-   answer='No' %}
+
 
 ## Challenges with Custom Coding
 
@@ -513,13 +298,9 @@ days to respond but we would be happy to follow up.
 
 ### Short / Quick Follow-on Questions
 
-{% include qanda
-   question='Will the pipes freeze in a common brick wall of same thickness?'
-   answer='Yes' %}
 
-{% include qanda
-   question='What is the Optimum thickness of an Adobe Brick Wall?'
-   answer='0.3-0.4 meters' %}
+
+
 
 ### Are the assumptions correct?
 
@@ -533,9 +314,6 @@ composed more of water (in the pipe) than it is of wall
 
 and our numerical model would fail.
 
-{% include qanda
-   question='Did this in fact happen in our example, above?'
-   answer='Maybe. Certainly the pipe is wider than the original picture suggests.' %}
 
 ### Determine Optimum Wall Thicknesses
 
