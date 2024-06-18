@@ -30,7 +30,7 @@ cd {{ site.handson_root }}/hand_coded_heat
 
 Will my pipes freeze during a long, cold storm?
 
-![Wall and Pipe::](wall_and_pipe.png){:width="500px"}
+![Wall and Pipe::](assets/wall_and_pipe.png){:width="500px"}
 
 You keep the inside temperature of the house always at 70 degrees F. But, there is an
 overnight storm coming. The outside temperature is expected to drop to -40 degrees F for 15.5
@@ -87,7 +87,16 @@ $$u_i^{k+1} = ru_{i+1}^k+(1-2r)u_i^k+ru_{i-1}^k$$
 
 where \\( r=\alpha\frac{\Delta t}{\Delta x^2} \\)
 
+### include qanda
+* **Question**: Is there anything in this numerical treatment that feels like a _mesh_?
+* **Answer**: In the process of discretizing the PDE, we have defined a fixed spacing in x
+  and a fixed spacing in t as shown in the figure here
 
+  [<img src="assets/heat_mesh.png" width="320">](heat_mesh.png){:align="middle"}
+
+  This is essentially a uniform mesh. Later lessons
+  here address more sophisticated discretizations in space and in time which
+  depart from these often inflexible fixed spacings.
 
 ---
 
@@ -113,13 +122,27 @@ solution_update_ftcs(
     Number bc_0,        // boundary condition @ x=0
     Number bc_1         // boundary condition @ x=Lx
 )
-
 ```
+### Q and A 
 
+* **Question**: Using eq. 5, implement the body of this function
+* **Answer:**:
+  ```
+      Number const r = alpha * dt / (dx * dx);
 
-```
+      // Sanity check for stability
+      if (r > 0.5) return false;
 
-```
+      // Update the solution using FTCS algorithm
+      for (int i = 1; i < n-1; i++)
+          uk1[i] = r*uk0[i+1] + (1-2*r)*uk0[i] + r*uk0[i-1];
+
+      // Impose boundary conditions for solution indices 0 & n-1
+      uk1[0  ] = bc0;
+      uk1[n-1] = bc1;
+
+      return true;
+  ```
 
 Edit `ftcs.C` and implement the FTCS numerical algorithm by coding the body of this function.
 
@@ -138,20 +161,102 @@ make heat
 ```
 without any target specified will display a set of convenient make targets.
 
-
+```
+Targets:
+    heat: makes the default heat application (double precision)
+    heat-half: makes the heat application with half precision
+    heat-single: makes the heat application with single precision
+    heat-double: makes the heat application with double precision
+    heat-long-double: makes the heat application with long-double precision
+    PTOOL=[gnuplot,matplotlib,visit] RUNAME=<run-dir-name> plot: plots results
+    check: runs various tests confirming steady-state is linear
+```
 
 ```
 % ./heat --help
+Usage: ./heat <arg>=<value> <arg>=<value>...
+    runame="heat_results"               name to give run and results dir (char*)
+    alpha=0.2         material thermal diffusivity (sq-meters/second) (fpnumber)
+    lenx=1                                   material length (meters) (fpnumber)
+    dx=0.1                x-incriment. Best if lenx/dx==int. (meters) (fpnumber)
+    dt=0.004                                    t-incriment (seconds) (fpnumber)
+    maxt=2       >0:max sim time (seconds) | <0:min l2 change in soln (fpnumber)
+    bc0=0                   boundary condition @ x=0: u(0,t) (Kelvin) (fpnumber)
+    bc1=1             boundary condition @ x=lenx: u(lenx,t) (Kelvin) (fpnumber)
+    ic="const(1)"               initial condition @ t=0: u(x,0) (Kelvin) (char*)
+    alg="ftcs"                            algorithm ftcs|upwind15|crankn (char*)
+    savi=0                                   save every i-th solution step (int)
+    save=0                              save error in every saved solution (int)
+    outi=100                      output progress every i-th solution step (int)
+    noout=0                                       disable all file outputs (int)
+    prec=2           precision 0=half/1=float/2=double/3=long double (int const)
+Examples...
+    ./heat dx=0.01 dt=0.0002 alg=ftcs
+    ./heat dx=0.1 bc0=273 bc1=273 ic="spikes(273,5,373)"
 ```
 
+### About the initial condition (ic) argument...
 
+The initial condition argument, `ic`, handles a few interesting cases
 
+Constant, `ic="const(V)"`
+
+: Set initial condition to constant value, `V`
+
+Ramp, `ic="ramp(L,R)"`
+
+: Set initial condition to a linear ramp having value `L` @ x=0 and `R` @ x=$$L_x$$.
+
+Step, `ic="step(L,Mx,R)"`
+
+: Set initial condition to a step function having value `L` for all x<Mx and value `R` for all x>=Mx.
+
+Random, `ic="rand(S,B,A)"`
+
+: Set initial condition to random values in the range [B-A,B+A] using seed value `S`.
+
+Sin, `ic="sin(Pi*x)"`
+
+: Set initial condition to $$sin(\pi x)$$.
+
+Spikes, `ic="spikes(C,A0,X0,A1,X1,...)"`
+
+: Set initial condition to a constant value, `C` with any number of _spikes_ where each spike is the pair, `Ai` specifying the spike amplitude and `Xi` specifying its position in, x.
 
 
 #### Default Run
 Run the application with default arguments (e.g. don't specify any) and see what happens...
 
+```
+% ./heat
+    runame="heat_results"
+    prec="double"
+    alpha=0.2
+    lenx=1
+    dx=0.1
+    dt=0.004
+    maxt=2
+    bc0=0
+    bc1=1
+    ic="const(1)"
+    alg="ftcs"
+    savi=0
+    save=0
+    outi=100
+    noout=0
+Iteration 0000: last change l2=0.0909091
+Iteration 0100: last change l2=2.42918e-06
+Iteration 0200: last change l2=4.86446e-07
+Iteration 0300: last change l2=1.00929e-07
+Iteration 0400: last change l2=2.09483e-08
+Iteration 0500: last change l2=4.41684e-09
+Counts: Adds:24500, Mults:25001, Divs:1005, Bytes:176
+```
 
+Before running, the application dumps its command-line arguments so the user can
+see what parameters it was run with. In this case, you are seeing the default
+values. It then runs the problem as defined by the command-line arguments and
+saves result files, as needed, to the directory specified by the `runame=` argument.
 
 #### Understanding the output and results
 
@@ -200,7 +305,13 @@ _time_ of the solution data stored therein.
 Before we use our new application to solve our simple science question, how can we assure
 ourselves that the code we have written is not somehow seriously broken?
 
+### Can you think ways to sanity check the our code?
 
+* Compare it to known, validated numerical solutions.
+* Compare it to known analytical solutions.
+* Confirm its behavior at steady state.
+
+In any case, think about how you would measure _error_.
 
 We know, maybe even intuitively, that if we maintain constant temperatures at
 $$A @ x=0$$ and $$B @ x=L_x$$, then after a long time (e.g. when the solution
@@ -211,8 +322,37 @@ below.
 
 ![Evolution Towards Steady State ::](Heat_Transfer.gif)
 
+### Construct a suitable command-line to easily confirm a linear steady state'
 
+Since the default length is 1 and the default boundary conditions are 0 and 1,
+we just need to run the problem for a long time. But, to be a little more
+thorough, it is even better to start with a random initial condition too.
 
+```
+% ./heat dx=0.25 maxt=100 ic="rand(125489,100,50)" runame=test
+```
+
+### How do you confirm results after a long time are a linear steady state?'
+
+Examine the initial and final results file and confirm even a random input
+still yields a final result where $$u=x_{i}$$ for all rows of the results file
+
+```
+% cat test/test_soln_00000.curve
+# Temperature
+       0    69.09
+    0.25    143.6
+     0.5     96.3
+    0.75    52.61
+       1    131.6
+% cat test/test_soln_final.curve
+# Temperature
+       0        0
+    0.25     0.25
+     0.5      0.5
+    0.75     0.75
+       1        1
+```
 
 ## Exercise #3: Use Applicaton to Do Some Science 
 
@@ -233,7 +373,9 @@ Back to our original problem...will our water pipes freeze?
 **Note:** An all too common issue in simulation applications is being sure data is
 input in the correct units. Take care!
 
+### Determine the command-line to run for our simple science problem?'
 
+Run `./heat runame=wall alpha=8.2e-8 lenx=0.25 dx=0.01 dt=100 outi=100 savi=1000 maxt=55800 bc0=233.15 bc1=294.261 ic="const(294.261)"`
 
 ## Exercise #4: Analyze Results and Do Some Science
 
@@ -246,8 +388,11 @@ make plot PTOOL=gnuplot RUNAME=wall
 
 Depending on your situation, the above command may or may not produce a plot looking like below.
 
-![Pipe Solution ::](pipe_solution.png){:width="400"}
+![Pipe Solution ::](assets/pipe_solution.png){:width="400"}
 
+### Will the pipes freeze?
+
+No.
 
 ## Challenges with Custom Coding
 
@@ -308,6 +453,12 @@ days to respond but we would be happy to follow up.
 
 ### Short / Quick Follow-on Questions
 
+### Will the pipes freeze in a common brick wall of same thickness?'
+
+Yes.
+
+### What is the Optimum thickness of an Adobe Brick Wall?
+About 0.3-0.4 meters'
 
 ### Are the assumptions correct?
 
@@ -317,11 +468,13 @@ a short lesson, we made a number of *simplifying assumptions*. If the picture
 below was a more accurate representation of the situation, the wall is
 composed more of water (in the pipe) than it is of wall
 
-![Wall and Pipe::](wall_and_pipe2.png){:width="400px"}
+![Wall and Pipe::](assets/wall_and_pipe2.png){:width="400px"}
 
 and our numerical model would fail.
 
+### Did this in fact happen in our example, above?
 
+Maybe. Certainly the pipe is wider than the original picture suggests.
 
 ### Determine Optimum Wall Thicknesses
 
@@ -379,7 +532,7 @@ activity name _Crank-Nicholson_ and upload evidence of your completed solution.
 
 ### Use The Application to Solve The Pipeline Problem
 
-![Pipeline Problem::](pipeline.png){:width="500"}
+![Pipeline Problem::](assets/pipeline.png){:width="500"}
 
 An pipeline carrying Ethenol-85 (E85) runs between a manure processing
 facility and a kerosene production factory. In the unlikely event that
