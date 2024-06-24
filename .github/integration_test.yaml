@@ -1,0 +1,17 @@
+name: Hello-Numerical-World CI/CD
+
+on:
+  push:
+    branches: ["CI-CD"]
+  pull_request:
+    branches: [ "main" ]
+    
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: make check
+      run: make check
