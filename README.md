@@ -1,5 +1,5 @@
 # Hello Numerical World
-For a complete, hands-on lesson involving this simple HPC/CSE application, please see the [ATPESC-2020 hands on lesson](docs/index.md).
+For a complete, hands-on lesson involving this simple HPC/CSE application, please see the [ATPESC-2020 hands on lesson](lessons/hand_coded_heat/).
 
 This is an implementation of an application for solving one dimensional heat conduction
 problems. It is the functional equivalent of a *Hello World* application for HPC/CSE.
