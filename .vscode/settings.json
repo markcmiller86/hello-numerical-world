@@ -8,5 +8,9 @@
     "python": "python -u"
   },
   "code-runner.runInTerminal": true,
-  "code-runner.saveFileBeforeRun": true
+  "code-runner.saveFileBeforeRun": true,
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.ruffArgs": []
 }
