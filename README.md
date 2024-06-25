@@ -48,7 +48,7 @@ with higher temporal order than FTCS.
 In addition, the application can be built with half, single, double and long-double precision.
 
 Details are described more fully in this [ATPESC](https://extremecomputingtraining.anl.gov)
-[Hands-On Lesson](https://xsdk-project.github.io/MathPackagesTraining2020/lessons/hand_coded_heat/)
+[Hands-On Lesson](https://josee1031.github.io/hello-numerical-world/lessons/hand_coded_heat/)
 
 ---
 
