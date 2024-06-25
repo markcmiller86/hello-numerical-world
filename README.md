@@ -1,4 +1,5 @@
 # Hello Numerical World
+![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 
 This is an implementation of an application for solving one dimensional heat conduction
 problems. It is the functional equivalent of a *Hello World* application for HPC/CSE.
