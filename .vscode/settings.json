@@ -12,5 +12,10 @@
   "python.linting.enabled": true,
   "python.linting.ruffEnabled": true,
   "python.linting.pylintEnabled": false,
-  "python.linting.ruffArgs": []
+  "python.linting.ruffArgs": [],
+  "files.associations": {
+    "libfoo.C": "cpp",
+    "utils.C": "cpp",
+    "helloPy.C": "cpp"
+  }
 }
