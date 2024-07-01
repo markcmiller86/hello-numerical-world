@@ -2,12 +2,6 @@
 
 #include "heat.H"
 
-// Number class' statics
-int         Number::nadds  = 0;
-int         Number::nmults = 0;
-int         Number::ndivs  = 0;
-std::size_t Number::nbytes = 0;
-
 // Command-line argument variables
 int noout        = 0;
 int savi         = 0;
@@ -141,9 +135,6 @@ int finalize(int ti, Number maxt, Number change)
     if (outi)
     {
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
-#ifndef _OPENMP
-        printf("Counts: %s\n", Number::counts_string());
-#endif
     }
 
     delete [] curr;
