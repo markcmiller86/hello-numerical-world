@@ -121,7 +121,7 @@ process_args(int argc, char **argv)
     HANDLE_ARG(save, int, %d, save error in every saved solution);
     HANDLE_ARG(outi, int, %d, output progress every i-th solution step);
     HANDLE_ARG(noout, int, %d, disable all file outputs);
-    HANDLE_ARG(prec, const int, %d, precision 0=half/1=float/2=double/3=long double)
+    HANDLE_ARG(prec, const int, %d, precision 1=float/2=double/3=long double)
 
     if (help)
         handle_help(argv[0]);
