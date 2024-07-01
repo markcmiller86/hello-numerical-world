@@ -1,14 +1,12 @@
 #include <ostream>
 
-#include "Half.H"
-
 #ifndef FPTYPE
 #define FPTYPE 2
 #endif
 
 // 0=half, 1=float, 2=double, 3=quad
 #if   FPTYPE == 0
-typedef half_float::half fpnumber;
+#error Half is disabled
 #elif FPTYPE == 1
 typedef float fpnumber;
 #elif FPTYPE == 2
@@ -19,7 +17,7 @@ typedef long double fpnumber;
 #error UNRECOGNIZED FPTYPE
 #endif
 
-#define Number double
+#define Number fpnumber
 
 #define TSTART -1
 #define TFINAL -2

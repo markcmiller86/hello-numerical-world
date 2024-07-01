@@ -8,7 +8,7 @@ static char clargs[2048];
     char const *q = style[1]=='s'?"\"":""; \
     void *valp = (void*) &VAR; \
     int const len = strlen(#VAR)+1; \
-    std::stringstream strmvar; \
+    char valstr[64]; \
     for (i = 1; i < argc; i++) \
     {\
         int valid_style = style[1]=='d'||style[1]=='g'||style[1]=='s'; \
@@ -25,23 +25,23 @@ static char clargs[2048];
                 *((char**) valp) = (char*) strdup(argv[i]+len); \
         }\
     }\
-    strmvar << VAR; \
+    snprintf(valstr, sizeof(valstr), #STYLE, VAR); \
     if (help) \
     {\
         char tmp[256]; \
         int len = snprintf(tmp, sizeof(tmp), "    %s=%s%s%s", \
-            #VAR, q, strmvar.str().c_str(), q);\
+            #VAR, q, valstr, q);\
         snprintf(tmp, sizeof(tmp), "%s (%s)", #HELP, #TYPE); \
         fprintf(stderr, "    %s=%s%s%s%*s\n", \
-            #VAR, q, strmvar.str().c_str(), q, 80-len, tmp);\
+            #VAR, q, valstr, q, 80-len, tmp);\
     }\
     else \
     { \
         char tmp[64]; \
         fprintf(stderr, "    %s=%s%s%s\n", \
-            #VAR, q, strmvar.str().c_str(), q);\
+            #VAR, q, valstr, q);\
         snprintf(tmp, sizeof(tmp), "    %s=%s%s%s\n", \
-            #VAR, q, strmvar.str().c_str(), q);\
+            #VAR, q, valstr, q);\
         strcat(clargs, tmp); \
     } \
 }

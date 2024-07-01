@@ -87,13 +87,13 @@ initialize(void)
     Nt = (int) (maxt/dt);
     dx = lenx/(Nx-1);
 
-    curr  = new Number[Nx]();
-    back1 = new Number[Nx]();
+    curr  = (Number*) malloc(Nx * sizeof(Number));
+    back1 = (Number*) malloc(Nx * sizeof(Number));
     if (save)
     {
-        exact = new Number[Nx]();
-        change_history = new Number[Nx]();
-        error_history = new Number[Nx]();
+        exact = (Number*) malloc(Nx * sizeof(Number));
+        change_history = (Number*) malloc(Nx * sizeof(Number));
+        error_history = (Number*) malloc(Nx * sizeof(Number));
     }
 
     assert(strncmp(alg, "ftcs", 4)==0 ||
@@ -115,7 +115,7 @@ initialize(void)
         initialize_crankn(Nx, alpha, dx, dt, &cn_Amat);
 
     if (!strncmp(alg, "dufrank", 7))
-        back2 = new Number[Nx]();
+        back2 = (Number*) malloc(Nx * sizeof(Number));
 
     // Initial condition
     set_initial_condition(Nx, back1, dx, ic);
@@ -137,13 +137,13 @@ int finalize(int ti, Number maxt, Number change)
         printf("Iteration %04d: last change l2=%g\n", ti, (double) change);
     }
 
-    delete [] curr;
-    delete [] back1;
-    if (back2) delete [] back2;
-    if (exact) delete [] exact;
-    if (change_history) delete [] change_history;
-    if (error_history) delete [] error_history;
-    if (cn_Amat) delete [] cn_Amat;
+    free(curr);
+    free(back1);
+    if (back2) free(back2);
+    if (exact) free(exact);
+    if (change_history) free(change_history);
+    if (error_history) free(error_history);
+    if (cn_Amat) free(cn_Amat);
     if (strncmp(alg, "ftcs", 4)) free((void*)alg);
     if (strncmp(ic, "const(1)", 8)) free((void*)ic);
 

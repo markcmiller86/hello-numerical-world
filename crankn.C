@@ -31,7 +31,7 @@ initialize_crankn(int n,
     Number const w = alpha * dt / dx / dx;
 
     // Build a tri-diagonal matrix
-    Number *cn_Amat = new Number[3*n]();
+    Number *cn_Amat = (Number*) malloc(3*n*sizeof(Number));
 
     cn_Amat[0+0*3] = 0.0;
     cn_Amat[1+0*3] = 1.0;
