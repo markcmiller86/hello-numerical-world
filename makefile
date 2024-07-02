@@ -19,7 +19,7 @@ EXE = heat
 
 # Implicit rule for object files
 %.o : %.C
-	$(CC) -c $(CCFLAGS) $(CPPFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 # Help is default target
 help:
@@ -38,7 +38,7 @@ heat: $(OBJ)
 	$(CC) -o heat $(OBJ) $(LDFLAGS) -lm
 
 heat-omp: CC=clang
-heat-omp: CCFLAGS=-fopenmp
+heat-omp: CFLAGS=-fopenmp
 heat-omp: LDFLAGS=-lomp -lstdc++
 heat-omp: $(OBJ)
 heat-omp: heat
@@ -46,6 +46,13 @@ heat-omp: heat
 
 # All objects depend on header
 $(OBJ): $(HDR)
+
+# Convenience variable/target for half-precision
+heat-half: CPPFLAGS=-DFPTYPE=0
+heat-half: CFLAGS=-Wno-format
+heat-half: $(OBJ)
+heat-half: heat
+	mv heat heat-half
 
 # Convenience variable/target for single-precision
 heat-single: CPPFLAGS=-DFPTYPE=1

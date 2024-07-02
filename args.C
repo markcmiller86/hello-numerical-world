@@ -25,7 +25,7 @@ static char clargs[2048];
                 *((char**) valp) = (char*) strdup(argv[i]+len); \
         }\
     }\
-    snprintf(valstr, sizeof(valstr), #STYLE, VAR); \
+    snprintf(valstr, sizeof(valstr), #STYLE, (TYPE) VAR); \
     if (help) \
     {\
         char tmp[256]; \
