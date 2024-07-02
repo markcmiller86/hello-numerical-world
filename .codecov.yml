@@ -1,7 +1,7 @@
 codecov:
-  require_ci_to_pass: no
+  require_ci_to_pass: False
   notify:
-    wait_for_ci: no
+    wait_for_ci: False
 
 coverage:
   status:

@@ -1,0 +1,5 @@
+*.o
+.vscode
+heat
+heat_results
+
