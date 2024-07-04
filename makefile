@@ -98,7 +98,7 @@ check: heat check/check_soln_final.curve
 	@cat check/check_soln_00000.curve
 	@echo "Final result..."
 	@cat check/check_soln_final.curve
-	./check_lss.sh check/check_soln_final.curve $(ERRBND)
+	./python_testing/check_lss.py check/check_soln_final.curve $(ERRBND)
 
 check_ftcs: check
 
@@ -107,13 +107,13 @@ check_crankn/check_crankn_soln_final.curve:
 
 check_crankn: heat check_crankn/check_crankn_soln_final.curve
 	cat check_crankn/check_crankn_soln_final.curve
-	./check_lss.sh check_crankn/check_crankn_soln_final.curve $(ERRBND)
+	./python_testing/check_lss.py check_crankn/check_crankn_soln_final.curve $(ERRBND)
 
 check_dufrank/check_dufrank_soln_final.curve:
 	./heat alg=dufrank runame=check_dufrank outi=0 maxt=40 ic="rand(0,0.2,2)"
 
 check_dufrank: heat check_dufrank/check_dufrank_soln_final.curve
 	cat check_dufrank/check_dufrank_soln_final.curve
-	./check_lss.sh check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
+	./python_testing/check_lss.py check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
 
 check_all: check_ftcs check_crankn check_dufrank
