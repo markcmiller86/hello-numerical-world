@@ -1,17 +1,19 @@
+#!/usr/bin/env python3
 import math
- 
+import sys
+
 def exact_solution_impulse(alpha, A, x0, x, t):
     """
     Computes the temperature distribution of a 1D heat equation at time t
     for an initial impulse of amplitude A at position x0, using vanilla Python.
- 
+
     Parameters:
     - x: position at which to evaluate the temperature distribution.
     - t: time at which the temperature is evaluated.
     - A: amplitude of the initial heat impulse.
     - x0: position of the initial heat impulse.
     - alpha: thermal diffusivity of the medium.
- 
+
     Returns:
     - u: temperature at position x and time t.
     """
@@ -24,24 +26,65 @@ def exact_solution_impulse(alpha, A, x0, x, t):
         exp_term = -((x - x0)**2.0 / (4.0 * alpha * t))
         exp_term = math.exp(exp_term)
         return A * exp_term / sqrt_term
- 
-# Example usage for a all points, x
- 
-# set parameters
-dt = 0.00004
-t = dt * 100 # at time t=0.004
-#A = 7000 / 9.973557010035817     # amplitude of the impulse
-A = 1
-alpha = 0.2 # thermal diffusivity of wood
-lenx = 1.0  # width of wall
-dx = 0.01   # spacing in x
-x0 = 50*dx  # impulse located at middle
- 
-#
-# Loop to produce “solution” for all x and given t
-#
-x = 0
-while x < lenx:
-    y = exact_solution_impulse(alpha, A, x0, x, t)
-    print(x, y)
-    x += dx
+
+def main():
+    errbnd = 1e-6
+    comparison_arr = []
+    x = 0
+    dt = 0.00004
+    t = dt * 100  # at time t=0.004
+    A = 1
+    alpha = 0.2  # thermal diffusivity of wood
+    lenx = 1.0  # width of wall
+    dx = 0.01  # spacing in x
+    x0 = 50 * dx  # impulse located at middle
+    relerr = False
+
+    while x < lenx:
+        y = exact_solution_impulse(alpha, A, x0, x, t)
+        comparison_arr.append((x, y))
+        x += dx
+
+    if len(sys.argv) < 2:
+        print("Specify input file as 1st argument")
+        sys.exit(1)
+
+    rdfile = sys.argv[1]
+    try:
+        with open(rdfile, 'r') as file:
+            for line in file:
+                if '#' in line:
+                    continue
+
+                parts = line.split()
+                if len(parts) < 2:
+                    continue
+
+                xval = float(parts[0])
+                yval = float(parts[1])
+
+                # Find the corresponding (x, y) in comparison_arr
+                comp_x, comp_y = next(((cx, cy) for cx, cy in comparison_arr if abs(cx - xval) < errbnd), (None, None))
+
+                if comp_x is None:
+                    print(f"No matching x value found in comparison array for x={xval}")
+                    sys.exit(1)
+
+                if relerr:
+                    diffr = abs((yval - comp_y) / comp_y)
+                    diffl = diffr <= errbnd
+                else:
+                    diffr = abs(yval - comp_y)
+                    diffl = diffr <= errbnd
+
+                if not diffl:
+                    print(f"Check failed at x={xval} y={yval} yexp={comp_y}, diff={diffr}")
+                    sys.exit(1)
+
+        print("All checks passed successfully.")
+    except FileNotFoundError:
+        print(f"File not found: {rdfile}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
