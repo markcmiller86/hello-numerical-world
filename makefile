@@ -80,7 +80,7 @@ plot:
 	@test -d $(RUNAME) && ./tools/run_$(PTOOL).sh $(RUNAME) $(PIPEWIDTH)
 
 check_clean:
-	$(RM) -rf check check_crankn check_dufrank
+	$(RM) -rf check check_impulse check_crankn check_dufrank
 	$(RM) -rf heat heat-omp heat-half heat-single heat-double heat-long-double
 
 clean: check_clean
@@ -93,12 +93,24 @@ clean: check_clean
 check/check_soln_final.curve:
 	./heat runame=check outi=0 maxt=10 ic="rand(0,0.2,2)"
 
+check_impulse/check_impulse_soln_00100.curve:
+	./heat runame=check_impulse dx=0.01 dt=0.00004 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
+
 check: heat check/check_soln_final.curve
 	@echo "Time zero..."
 	@cat check/check_soln_00000.curve
 	@echo "Final result..."
 	@cat check/check_soln_final.curve
 	./python_testing/check_lss.py check/check_soln_final.curve $(ERRBND)
+
+check_impulse/check_impulse_soln_00100.curve: heat
+	@echo "Generating impulse check solution..."
+	./heat runame=check_impulse dx=0.01 dt=0.00004 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
+	
+check_impulse: check_impulse/check_impulse_soln_00100.curve 
+	@echo "Impulse check result..."
+	@cat check_impulse/check_impulse_soln_00100.curve
+	./python_testing/impulse_solution.py check_impulse/check_impulse_soln_00100.curve dx=0.01 dt=0.00004
 
 check_ftcs: check
 

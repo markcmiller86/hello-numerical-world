@@ -26,17 +26,24 @@ def exact_solution_impulse(alpha, A, x0, x, t):
         exp_term = -((x - x0)**2.0 / (4.0 * alpha * t))
         exp_term = math.exp(exp_term)
         return A * exp_term / sqrt_term
-
-def main():
-    errbnd = 1e-6
+    
+rdfile = sys.argv[1]
+dx = float(sys.argv[2].split('=')[1])
+dt = float(sys.argv[3].split('=')[1])
+# bc1 = int(sys.argv[4].split('=')[1])
+# ic = sys.argv[5].split('=')[1].strip('"')
+# maxt = float(sys.argv[6].split('=')[1])
+# outi = int(sys.argv[7].split('=')[1])
+# savi = int(sys.argv[8].split('=')[1])
+# ./heat runame=check_impulse dx=0.01 dt=0.00004 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
+def main(rdfile, dx, dt):
+    errbnd = 1e-3
     comparison_arr = []
-    x = 0
-    dt = 0.00004
+    x = 0 # constant
     t = dt * 100  # at time t=0.004
-    A = 1
+    A = 1 # constant
     alpha = 0.2  # thermal diffusivity of wood
     lenx = 1.0  # width of wall
-    dx = 0.01  # spacing in x
     x0 = 50 * dx  # impulse located at middle
     relerr = False
 
@@ -87,4 +94,4 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    main(rdfile, dx, dt)
