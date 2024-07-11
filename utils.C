@@ -77,18 +77,7 @@ write_array(int t, int n, Number dx, Number const *a)
     outf = fopen(fname,"w");
     fprintf(outf, "# %s\n", vname);
     for (i = 0; i < n; i++)
-    {
-        if (sizeof(fpnumber) == 2)
-            fprintf(outf, "%- .4e %- .4e\n", (double) i*dx, (double) a[i]);
-        else if (sizeof(fpnumber) == 4)
-            fprintf(outf, "%- .7e %- .7e\n", (double) i*dx, (double) a[i]);
-        else if (sizeof(fpnumber) == 8)
-            fprintf(outf, "%- .16e %- .16e\n", (double) i*dx, (double) a[i]);
-        else if (sizeof(fpnumber) == 10)
-            fprintf(outf, "%- .19Le %- .19Le\n", (long double) i*dx, (long double) a[i]);
-        else if (sizeof(fpnumber) == 16)
-            fprintf(outf, "%- .34Le %- .34Le\n", (long double) i*dx, (long double) a[i]);
-    }
+        fprintf(outf, FPFMT " " FPFMT "\n", (FPCAST) i*dx, (FPCAST) a[i]);
     fclose(outf);
 }
 
