@@ -59,6 +59,7 @@ def main():
                 if not diffl:
                     print(f"Check failed at x={xval} y={yval} yexp={exact_yval}, diff={diffr}")
                     sys.exit(1)
+        sys.exit(0)
     except FileNotFoundError:
         print(f"File not found: {rdfile}")
         sys.exit(1)

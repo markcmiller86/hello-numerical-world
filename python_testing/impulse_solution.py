@@ -28,22 +28,25 @@ def exact_solution_impulse(alpha, A, x0, x, t):
         return A * exp_term / sqrt_term
     
 rdfile = sys.argv[1]
-dx = float(sys.argv[2].split('=')[1])
-dt = float(sys.argv[3].split('=')[1])
+dx = float(sys.argv[2])
+dt = float(sys.argv[3])
+alpha = float(sys.argv[4])
+lenx = float(sys.argv[4])
 # bc1 = int(sys.argv[4].split('=')[1])
 # ic = sys.argv[5].split('=')[1].strip('"')
 # maxt = float(sys.argv[6].split('=')[1])
 # outi = int(sys.argv[7].split('=')[1])
 # savi = int(sys.argv[8].split('=')[1])
-# ./heat runame=check_impulse dx=0.01 dt=0.00004 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
-def main(rdfile, dx, dt):
+# ./heat runame=check_impulse dx=0.01 dt=0.00004 alpha=0.2 lenx=1 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
+# add alpha and lenx
+def main(rdfile, dx, dt, alpha, lenx):
     errbnd = 1e-3
     comparison_arr = []
     x = 0 # constant
     t = dt * 100  # at time t=0.004
     A = 1 # constant
-    alpha = 0.2  # thermal diffusivity of wood
-    lenx = 1.0  # width of wall
+    # alpha = 0.2  # thermal diffusivity of wood
+    # lenx = 1.0  # width of wall
     x0 = 50 * dx  # impulse located at middle
     relerr = False
 
@@ -59,39 +62,36 @@ def main(rdfile, dx, dt):
     rdfile = sys.argv[1]
     try:
         with open(rdfile, 'r') as file:
+            index = 0
             for line in file:
                 if '#' in line:
                     continue
+                if index < len(comparison_arr):
+                    parts = line.split()
+                    if len(parts) < 2:
+                        continue
 
-                parts = line.split()
-                if len(parts) < 2:
-                    continue
+                    xval = float(parts[0])
+                    yval = float(parts[1])
+                    comp_y = comparison_arr[index][1]
+                
+                    if relerr:
+                        diffr = abs((yval - comp_y) / comp_y)
+                        diffl = diffr <= errbnd
+                    else:
+                        diffr = abs(yval - comp_y)
+                        diffl = diffr <= errbnd
 
-                xval = float(parts[0])
-                yval = float(parts[1])
-
-                # Find the corresponding (x, y) in comparison_arr
-                comp_x, comp_y = next(((cx, cy) for cx, cy in comparison_arr if abs(cx - xval) < errbnd), (None, None))
-
-                if comp_x is None:
-                    print(f"No matching x value found in comparison array for x={xval}")
-                    sys.exit(1)
-
-                if relerr:
-                    diffr = abs((yval - comp_y) / comp_y)
-                    diffl = diffr <= errbnd
-                else:
-                    diffr = abs(yval - comp_y)
-                    diffl = diffr <= errbnd
-
-                if not diffl:
-                    print(f"Check failed at x={xval} y={yval} yexp={comp_y}, diff={diffr}")
-                    sys.exit(1)
+                    if not diffl:
+                        print(f"Check failed at x={xval} y={yval} yexp={comp_y}, diff={diffr}")
+                        sys.exit(1)
+                break
 
         print("All checks passed successfully.")
+        sys.exit(0)
     except FileNotFoundError:
         print(f"File not found: {rdfile}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    main(rdfile, dx, dt)
+    main(rdfile, dx, dt, alpha, lenx)
