@@ -39,6 +39,10 @@
     "utils.C": "cpp",
     "helloPy.C": "cpp",
     "ftcs.C": "cpp",
-    "heat.C": "cpp"
+    "heat.C": "cpp",
+    "dufrank.C": "cpp",
+    "args.C": "cpp",
+    "crankn.C": "cpp",
+    "exact.C": "cpp"
   }
 }
