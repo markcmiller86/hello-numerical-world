@@ -1,4 +1,4 @@
-#include "heat.H"
+#include "heat.h"
 
 static char clargs[2048];
 

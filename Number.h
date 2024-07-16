@@ -1,4 +1,4 @@
-#include <ostream>
+
 
 #ifndef FPTYPE
 #define FPTYPE 2
