@@ -16,6 +16,11 @@
   "files.associations": {
     "libfoo.C": "cpp",
     "utils.C": "cpp",
-    "helloPy.C": "cpp"
+    "helloPy.C": "cpp",
+    "args.C": "cpp",
+    "exact.C": "cpp",
+    "heat.C": "cpp",
+    "ftcs.C": "cpp",
+    "dufrank.C": "cpp"
   }
 }
