@@ -1,4 +1,4 @@
-#include "heat.H"
+#include "heat.h"
 
 void 
 compute_exact_steady_state_solution(int n, Number *a, Number dx, char const *ic,

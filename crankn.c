@@ -1,4 +1,4 @@
-#include "heat.H"
+#include "heat.h"
 
 // Licensing: This code is distributed under the GNU LGPL license. 
 // Modified: 30 May 2009 Author: John Burkardt
@@ -31,7 +31,7 @@ initialize_crankn(int n,
     Number const w = alpha * dt / dx / dx;
 
     // Build a tri-diagonal matrix
-    Number *cn_Amat = new Number[3*n]();
+    Number *cn_Amat = (Number*) malloc(3*n*sizeof(Number));
 
     cn_Amat[0+0*3] = 0.0;
     cn_Amat[1+0*3] = 1.0;
@@ -79,7 +79,7 @@ r83_np_sl ( int n, Number const *a_lu, Number const *b, Number *x)
     }
 }
 
-bool
+int
 update_solution_crankn(int n,
     Number *curr, Number const *last,
     Number const *cn_Amat,
@@ -90,5 +90,5 @@ update_solution_crankn(int n,
     curr[0] = bc_0;
     curr[n-1] = bc_1;
 
-    return true;
+    return 1;
 }
