@@ -1,5 +1,5 @@
 # Hello Numerical World
-![example workflow](https://github.com/Josee1031/hello-numerical-world/.github/workflows/main.yml/badge.svg)
+![example workflow](https://github.com/Josee1031/hello-numerical-world/actions/workflows/main.yml/badge.svg)
 
 For a complete, hands-on lesson involving this simple HPC/CSE application, please see the [ATPESC-2020 hands on lesson](lessons/hand_coded_heat/).
 
