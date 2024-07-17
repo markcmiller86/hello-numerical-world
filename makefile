@@ -93,9 +93,6 @@ clean: check_clean
 check/check_soln_final.curve:
 	./heat runame=check outi=0 maxt=10 ic="rand(0,0.2,2)"
 
-check_impulse/check_impulse_soln_00100.curve:
-	./heat runame=check_impulse dx=0.01 dt=0.00004 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
-
 check: heat check/check_soln_final.curve
 	@echo "Time zero..."
 	@cat check/check_soln_00000.curve
@@ -105,12 +102,20 @@ check: heat check/check_soln_final.curve
 
 check_impulse/check_impulse_soln_00100.curve: heat
 	@echo "Generating impulse check solution..."
-	./heat runame=check_impulse dx=0.01 dt=0.00004 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
+	./heat runame=check_impulse dx=0.01 dt=0.00004 alpha=0.2 lenx=1 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
 	
 check_impulse: check_impulse/check_impulse_soln_00100.curve 
 	@echo "Impulse check result..."
 	@cat check_impulse/check_impulse_soln_00100.curve
-	./python_testing/impulse_solution.py check_impulse/check_impulse_soln_00100.curve dx=0.01 dt=0.00004
+	./python_testing/impulse_solution.py check_impulse/check_impulse_soln_00100.curve 0.01 0.00004 0.2 1
+
+check_sin/check_sin_soln_final.curve: heat
+	@echo "Generating sinusoidal check solution..."
+	./heat runame=check_sin dx=0.01 dt=0.00004 alpha=0.2 ic="sin(10,2)" outi=100 savi=100 maxt=0.004 bc1=0
+	
+check_sin: check_sin/check_sin_soln_final.curve
+	@echo "Sinusoidal check result..."
+	./python_testing/sinusoidal_solution.py check_sin/check_sin_soln_final.curve 0.01 0.00004 0.2 10 2
 
 check_ftcs: check
 
