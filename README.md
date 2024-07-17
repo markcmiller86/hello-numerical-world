@@ -1,5 +1,5 @@
 # Hello Numerical World
-![example branch parameter](https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=CI-CD)
+![example workflow](https://github.com/Josee1031/hello-numerical-world/.github/workflows/main.yml/badge.svg)
 
 For a complete, hands-on lesson involving this simple HPC/CSE application, please see the [ATPESC-2020 hands on lesson](lessons/hand_coded_heat/).
 
