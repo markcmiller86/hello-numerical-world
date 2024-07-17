@@ -35,14 +35,14 @@
   
   // File associations to specify how certain files are treated
   "files.associations": {
-    "libfoo.C": "cpp",
-    "utils.C": "cpp",
-    "helloPy.C": "cpp",
-    "ftcs.C": "cpp",
-    "heat.C": "cpp",
-    "dufrank.C": "cpp",
-    "args.C": "cpp",
-    "crankn.C": "cpp",
-    "exact.C": "cpp"
+    "libfoo.c": "cpp",
+    "utils.c": "cpp",
+    "helloPy.c": "cpp",
+    "ftcs.c": "cpp",
+    "heat.c": "cpp",
+    "dufrank.c": "cpp",
+    "args.c": "cpp",
+    "crankn.c": "cpp",
+    "exact.c": "cpp"
   }
 }
