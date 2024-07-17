@@ -15,8 +15,13 @@ RM = rm
 HDR = Number.h heat.h
 # Source Files
 SRC = heat.c utils.c args.c exact.c ftcs.c crankn.c dufrank.c
+# Python Source Files
+pySRC = pyheat.c
 # Object Files
 OBJ = $(SRC:.c=.o)
+# Python Object Files
+pyOBJ = $(pySRC:.c=.o)
+pySO = $(pySRC:.c=.so)
 # Coverage Files
 GCOV = $(SRC:.c=.c.gcov) $(SRC:.c=.gcda) $(SRC:.c=.gcno) $(HDR:.h=.h.gcov)
 # Executable
@@ -89,7 +94,8 @@ check_clean:
 	$(RM) -rf heat heat-omp heat-single heat-double heat-long-double
 
 clean: check_clean
-	$(RM) -f $(OBJ) $(EXE) $(GCOV)
+	$(RM) -f $(OBJ) $(EXE) $(GCOV) $(pyOBJ) $(pySO)
+# added Python shared library [rene] 
 
 #
 # Run for a long time with random initial condition
@@ -122,3 +128,14 @@ check_dufrank: heat check_dufrank/check_dufrank_soln_final.curve
 	./check_lss.sh check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
 
 check_all: check_ftcs check_crankn check_dufrank
+
+PYTHON_INCLUDES := $(shell python3-config --includes)
+PYTHON_LDFLAGS := $(shell python3-config --ldflags) -lpython3.12
+
+# Target to build the Python extension module
+pyheat.so: $(pyOBJ) ftcs.o
+	cc -shared -o $(pySO) $(pyOBJ) ftcs.o -lm $(PYTHON_LDFLAGS)
+
+# Compile pyheat.c into pyheat.o
+pyheat.o: $(pySRC)
+	cc -c -fPIC $(pySRC) -o $(pyOBJ) -I. $(PYTHON_INCLUDES)
