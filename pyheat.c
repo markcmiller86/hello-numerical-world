@@ -2,14 +2,6 @@
 #include <stdlib.h>
 #include "heat.h"  // Include the header for the heat equation solver
 
-
-// #include "utils.c" // Ensure utility functions are available
-
-// Include the actual implementation file
-
-// #include "ftcs.c"
-// #include "heat.c"
-
 // declaring object name and type
 extern int
 update_solution_ftcs(int n,
@@ -17,7 +9,7 @@ update_solution_ftcs(int n,
     Number alpha, Number dx, Number dt,
     Number bc_0, Number bc_1);
 
-// Define a structure to hold problem data
+// Defines a structure to hold problem data
 typedef struct {
     double lenx;
     double alpha;
