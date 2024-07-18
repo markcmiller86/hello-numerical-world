@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import math
 import sys
+from impulse_solution import compare_results
 
 def sin_initial_equation(x, dt, A, B, alpha):
     """
@@ -52,38 +53,7 @@ def main(rdfile, dx, dt, A, B, alpha):
         sys.exit(1)
 
     rdfile = sys.argv[1]
-    try:
-        with open(rdfile, 'r') as file:
-            index = 0
-            for line in file:
-                if '#' in line:
-                    continue
-                if index < len(comparison_arr):
-                    parts = line.split()
-                    if len(parts) < 2:
-                        continue
-
-                    xval = float(parts[0])
-                    yval = float(parts[1])
-                    comp_y = comparison_arr[index][1]
-                
-                    if relerr:
-                        diffr = abs((yval - comp_y) / comp_y)
-                        diffl = diffr <= errbnd
-                    else:
-                        diffr = abs(yval - comp_y)
-                        diffl = diffr <= errbnd
-
-                    if not diffl:
-                        print(f"Check failed at x={xval} y={yval} yexp={comp_y}, diff={diffr}")
-                        sys.exit(1)
-                break
-
-        print("All checks passed successfully.")
-        sys.exit(0)
-    except FileNotFoundError:
-        print(f"File not found: {rdfile}")
-        sys.exit(1)
+    compare_results(rdfile, comparison_arr, errbnd, relerr)
 
 if __name__ == "__main__":
     main(rdfile, dx, dt, A, B, alpha)

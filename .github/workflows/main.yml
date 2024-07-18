@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
     
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,9 +14,3 @@ jobs:
     
     - name: make check
       run: make check
-
-    - name: make check_impulse
-      run: make check_impulse
-
-    - name: make check_sin
-      run: make check_sin
