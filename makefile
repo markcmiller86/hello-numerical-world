@@ -11,14 +11,19 @@ RUNAME ?= heat_results
 PIPEWIDTH ?= 0.1
 RM = rm
 
-HDR = Number.H heat.H
-SRC = heat.C utils.C args.C exact.C ftcs.C crankn.C dufrank.C
-OBJ = $(SRC:.C=.o)
-GCOV = $(SRC:.C=.C.gcov) $(SRC:.C=.gcda) $(SRC:.C=.gcno) $(HDR:.H=.H.gcov)
+# Headers
+HDR = Number.h heat.h
+# Source Files
+SRC = heat.c utils.c args.c exact.c ftcs.c crankn.c dufrank.c
+# Object Files
+OBJ = $(SRC:.c=.o)
+# Coverage Files
+GCOV = $(SRC:.c=.c.gcov) $(SRC:.c=.gcda) $(SRC:.c=.gcno) $(HDR:.h=.h.gcov)
+# Executable
 EXE = heat
 
 # Implicit rule for object files
-%.o : %.C
+%.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 # Help is default target
