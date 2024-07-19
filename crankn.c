@@ -1,4 +1,4 @@
-#include "heat.H"
+#include "heat.h"
 
 // Licensing: This code is distributed under the GNU LGPL license. 
 // Modified: 30 May 2009 Author: John Burkardt
@@ -79,7 +79,7 @@ r83_np_sl ( int n, Number const *a_lu, Number const *b, Number *x)
     }
 }
 
-bool
+int
 update_solution_crankn(int n,
     Number *curr, Number const *last,
     Number const *cn_Amat,
@@ -90,5 +90,5 @@ update_solution_crankn(int n,
     curr[0] = bc_0;
     curr[n-1] = bc_1;
 
-    return true;
+    return 1;
 }

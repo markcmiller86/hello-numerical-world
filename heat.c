@@ -1,6 +1,6 @@
-#include <cmath>
+#include <math.h>
 
-#include "heat.H"
+#include "heat.h"
 
 // Command-line argument variables
 int noout        = 0;
@@ -11,14 +11,14 @@ int nt           = 0; // number of parallel tasks
 char const *runame = "heat_results";
 char const *alg  = "ftcs";
 char const *ic   = "const(1)";
-Number lenx      = Number(1.0);
-Number alpha     = Number(0.2);
-Number dt        = Number(0.004);
-Number dx        = Number(0.1);
-Number bc0       = Number(0.0);
-Number bc1       = Number(1.0);
-Number maxt      = Number(2.0);
-Number min_change = Number(1e-8*1e-8);
+Number lenx      = 1.0;
+Number alpha     = 0.2;
+Number dt        = 0.004;
+Number dx        = 0.1;
+Number bc0       = 0.0;
+Number bc1       = 1.0;
+Number maxt      = 2.0;
+Number min_change = 1e-8*1e-8;
 
 // Various arrays of numerical data
 Number *curr           = 0; // current solution
@@ -58,19 +58,19 @@ extern void
 compute_exact_steady_state_solution(int n, Number *a, Number dx, char const *ic,
     Number alpha, Number t, Number bc0, Number bc1);
 
-extern bool
+extern int
 update_solution_ftcs(int n,
     Number *curr, Number const *back1,
     Number alpha, Number dx, Number dt,
     Number bc_0, Number bc_1);
 
-extern bool
+extern int
 update_solution_crankn(int n,
     Number *curr, Number const *back1,
     Number const *cn_Amat,
     Number bc_0, Number bc_1);
 
-extern bool
+extern int
 update_solution_dufrank(int n, Number *curr,
     Number const *back1, Number const *back2,
     Number alpha, Number dx, Number dt,
@@ -150,7 +150,7 @@ int finalize(int ti, Number maxt, Number change)
     return retval;
 }
 
-static bool
+static int
 update_solution()
 {
     if (!strcmp(alg, "ftcs"))
@@ -159,7 +159,7 @@ update_solution()
         return update_solution_crankn(Nx, curr, back1, cn_Amat, bc0, bc1);
     else if (!strcmp(alg, "dufrank"))
         return update_solution_dufrank(Nx, curr, back1, back2, alpha, dx, dt, bc0, bc1);
-    return false;
+    return 0;
 }
 
 static Number

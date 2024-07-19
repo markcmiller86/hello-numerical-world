@@ -1,4 +1,4 @@
-#include "heat.H"
+#include "heat.h"
 
 extern int Nx;
 extern Number *exact;
