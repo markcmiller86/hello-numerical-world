@@ -85,8 +85,8 @@ plot:
 	@test -d $(RUNAME) && ./tools/run_$(PTOOL).sh $(RUNAME) $(PIPEWIDTH)
 
 check_clean:
-	$(RM) -rf check check_crankn check_dufrank
-	$(RM) -rf heat heat-omp heat-single heat-double heat-long-double
+	$(RM) -rf check check_impulse check_crankn check_dufrank
+	$(RM) -rf heat heat-omp heat-half heat-single heat-double heat-long-double
 
 clean: check_clean
 	$(RM) -f $(OBJ) $(EXE) $(GCOV)
@@ -98,12 +98,25 @@ clean: check_clean
 check/check_soln_final.curve:
 	./heat runame=check outi=0 maxt=10 ic="rand(0,0.2,2)"
 
-check: heat check/check_soln_final.curve
+check: heat check/check_soln_final.curve check_sin/check_sin_soln_final.curve check_impulse/check_impulse_soln_00100.curve
 	@echo "Time zero..."
 	@cat check/check_soln_00000.curve
 	@echo "Final result..."
 	@cat check/check_soln_final.curve
-	./check_lss.sh check/check_soln_final.curve $(ERRBND)
+	./python_testing/check_lss.py check/check_soln_final.curve $(ERRBND)
+	@echo "Sinusoidal check result..."
+	./python_testing/sinusoidal_solution.py check_sin/check_sin_soln_final.curve 0.01 0.00004 0.2 10 2
+	@echo "Impulse check result..."
+	@cat check_impulse/check_impulse_soln_00100.curve
+	./python_testing/impulse_solution.py check_impulse/check_impulse_soln_00100.curve 0.01 0.00004 0.2 1
+
+check_impulse/check_impulse_soln_00100.curve: heat
+	@echo "Generating impulse check solution..."
+	./heat runame=check_impulse dx=0.01 dt=0.00004 alpha=0.2 lenx=1 bc1=0 ic="spikes(0,100,50)" maxt=0.04 outi=100 savi=100
+
+check_sin/check_sin_soln_final.curve: heat
+	@echo "Generating sinusoidal check solution..."
+	./heat runame=check_sin dx=0.01 dt=0.00004 alpha=0.2 ic="sin(10,2)" outi=100 savi=100 maxt=0.004 bc1=0
 
 check_ftcs: check
 
@@ -112,13 +125,13 @@ check_crankn/check_crankn_soln_final.curve:
 
 check_crankn: heat check_crankn/check_crankn_soln_final.curve
 	cat check_crankn/check_crankn_soln_final.curve
-	./check_lss.sh check_crankn/check_crankn_soln_final.curve $(ERRBND)
+	./python_testing/check_lss.py check_crankn/check_crankn_soln_final.curve $(ERRBND)
 
 check_dufrank/check_dufrank_soln_final.curve:
 	./heat alg=dufrank runame=check_dufrank outi=0 maxt=40 ic="rand(0,0.2,2)"
 
 check_dufrank: heat check_dufrank/check_dufrank_soln_final.curve
 	cat check_dufrank/check_dufrank_soln_final.curve
-	./check_lss.sh check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
+	./python_testing/check_lss.py check_dufrank/check_dufrank_soln_final.curve $(ERRBND)
 
 check_all: check_ftcs check_crankn check_dufrank

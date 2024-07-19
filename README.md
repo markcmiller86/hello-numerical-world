@@ -1,4 +1,7 @@
 # Hello Numerical World
+![example workflow](https://github.com/Josee1031/hello-numerical-world/actions/workflows/main.yml/badge.svg)
+
+For a complete, hands-on lesson involving this simple HPC/CSE application, please see the [ATPESC-2020 hands on lesson](lessons/hand_coded_heat/).
 
 This is an implementation of an application for solving one dimensional heat conduction
 problems. It is the functional equivalent of a *Hello World* application for HPC/CSE.
@@ -45,7 +48,7 @@ with higher temporal order than FTCS.
 In addition, the application can be built with half, single, double and long-double precision.
 
 Details are described more fully in this [ATPESC](https://extremecomputingtraining.anl.gov)
-[Hands-On Lesson](https://xsdk-project.github.io/MathPackagesTraining2020/lessons/hand_coded_heat/)
+[Hands-On Lesson](https://josee1031.github.io/hello-numerical-world/lessons/hand_coded_heat/)
 
 ---
 
