@@ -1,6 +1,6 @@
-#include "heat.H"
+#include "heat.h"
 
-bool                        // false if unstable, true otherwise
+int                        // 0 if unstable, 1 otherwise
 update_solution_dufrank(
     int n,                  // number of samples
     Number *uk,             // new array of u(x,k) to compute/return
@@ -22,5 +22,5 @@ update_solution_dufrank(
     uk[0  ] = bc0;
     uk[n-1] = bc1;
 
-    return true;
+    return 1;
 }
