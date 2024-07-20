@@ -43,6 +43,7 @@
     "dufrank.c": "cpp",
     "args.c": "cpp",
     "crankn.c": "cpp",
-    "exact.c": "cpp"
+    "exact.c": "cpp",
+    "heat.H": "cpp"
   }
 }
