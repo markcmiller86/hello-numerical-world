@@ -2,14 +2,6 @@
 #include <stdlib.h>
 #include "heat.h"  // Include the header for the heat equation solver
 
-
-// #include "utils.c" // Ensure utility functions are available
-
-// Include the actual implementation file
-
-// #include "ftcs.c"
-// #include "heat.c"
-
 // declaring object name and type
 extern int
 update_solution_ftcs(int n,
@@ -17,108 +9,122 @@ update_solution_ftcs(int n,
     Number alpha, Number dx, Number dt,
     Number bc_0, Number bc_1);
 
-// Define a structure to hold problem data
+
+// Defines a structure to hold problem data
 typedef struct {
-    double lenx;
-    double alpha;
-    int nx;
-    double dx;
-    double dt;
-    double *uk;
-    double *uk1;
+    double lenx;    // material length (meters)
+    double alpha;   // material thermal diffusivity (sq-meters/second)
 } HeatProblem;
 
-// Global variable to hold the problem data
-static HeatProblem problem;
+// Defines a structure to hold solution data
+typedef struct {
+    double dx;      // x (lenx) increment (meters)
+    double dt;      // t-increment (seconds)
+    int nx;         // number of samples (from ftcs.c)
+    double *uk;     // new array of u(x,k) to compute/return (from ftcs.c)
+    double *uk1;    // array u(x,k-1) computed @ -1 time index ago (from ftcs.c)
+} HeatSolution;
+
+// Defines a structure to hold run data
+typedef struct {
+    // Placeholder for future run-specific variables if needed
+} HeatRun;
+
+// Global arrays to hold instances of problem, solution, and run data
+static HeatProblem problems[10]; // array to hold problem "object", maxed at 10
+static HeatSolution solutions[10]; // array to hold solution "object", maxed at 10
+static HeatRun runs[10]; // array to hold run "object", maxed at 10
+static int problemIndex = 0; 
+static int solutionIndex = 0;
+static int runIndex = 0;
 
 // Function to initialize the heat equation problem
 static PyObject* init_problem(PyObject *self, PyObject *args) {
     double lenx, alpha;
-    int nx;
-    if (!PyArg_ParseTuple(args, "ddi", &lenx, &alpha, &nx)) {
+    if (!PyArg_ParseTuple(args, "dd", &lenx, &alpha)) {
         return NULL;
     }
-    
-    problem.lenx = lenx;
-    problem.alpha = alpha;
-    problem.nx = nx;
-    problem.dx = lenx / (nx - 1);
-    problem.dt = 0.0; // Default value, will be set in solve function
-    problem.uk = (double *)malloc(nx * sizeof(double));
-    problem.uk1 = (double *)malloc(nx * sizeof(double));
-    
-    if (!problem.uk || !problem.uk1) {
+
+    problems[problemIndex].lenx = lenx;
+    problems[problemIndex].alpha = alpha;
+
+    return PyLong_FromLong((long)problemIndex++);
+}
+
+// Function to initialize the heat equation solution
+static PyObject* init_solution(PyObject *self, PyObject *args) {
+    int probIndex, nx;
+    double dx, dt;
+    if (!PyArg_ParseTuple(args, "iddi", &probIndex, &dx, &dt, &nx)) {
+        return NULL;
+    }
+
+    solutions[solutionIndex].dx = dx;
+    solutions[solutionIndex].dt = dt;
+    solutions[solutionIndex].nx = nx;
+    solutions[solutionIndex].uk = (double *)malloc(nx * sizeof(double));
+    solutions[solutionIndex].uk1 = (double *)malloc(nx * sizeof(double));
+
+    if (!solutions[solutionIndex].uk || !solutions[solutionIndex].uk1) {
         return PyErr_NoMemory();
     }
-    
+
     // Initialize uk and uk1 with initial conditions (i.e., zero)
     for (int i = 0; i < nx; i++) {
-        problem.uk[i] = 0.0;
-        problem.uk1[i] = 0.0;
+        solutions[solutionIndex].uk[i] = 0.0;
+        solutions[solutionIndex].uk1[i] = 0.0;
     }
-    
-    Py_RETURN_NONE;
-    // modify to return pyobj of our creation [notes]
+
+    return PyLong_FromLong((long)solutionIndex++);
 }
+
 
 // Function to solve the heat equation
 static PyObject* solve_heat_equation(PyObject *self, PyObject *args) {
-    double dx, dt, maxt, bc0, bc1;
+    int solIndex, probIndex;
+    double maxt, bc0, bc1;
     int nt;
-    if (!PyArg_ParseTuple(args, "dddi|dd", &dx, &dt, &maxt, &nt, &bc0, &bc1)) {
+
+    if (!PyArg_ParseTuple(args, "iididd", &solIndex, &probIndex, &maxt, &nt, &bc0, &bc1)) {
         return NULL;
     }
-    
-    problem.dx = dx;
-    problem.dt = dt;
-    double alpha = problem.alpha;
-    double lenx = problem.lenx;
-    int nx = problem.nx;
-    
+
+    HeatProblem *prob = &problems[probIndex];
+    HeatSolution *sol = &solutions[solIndex];
+
     int stable = 1;
-    int time_steps = (int)(maxt / dt);
-    
+    int time_steps = (int)(maxt / sol->dt);
+
     for (int t = 0; t < time_steps; t++) {
-        stable = update_solution_ftcs(nx, problem.uk, problem.uk1, alpha, dx, dt, bc0, bc1);
+        stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, bc0, bc1);
         if (!stable) {
             PyErr_SetString(PyExc_RuntimeError, "Solution became unstable");
             return NULL;
         }
-        
-        // Swap uk and uk1 for next iteration
-        double *temp = problem.uk1;
-        problem.uk1 = problem.uk;
-        problem.uk = temp;
     }
-    
-    // Return the final solution as a Python list
-    PyObject *result = PyList_New(nx);
-    for (int i = 0; i < nx; i++) {
-        PyList_SetItem(result, i, PyFloat_FromDouble(problem.uk[i]));
-    }
-    
-    return result;
+
+    return PyFloat_FromDouble(sol->uk[sol->nx - 1]);  // Example return [need to adjust]
 }
 
-// Declare methods in the module
-static PyMethodDef HeatMethods[] = {
-    {"init_problem", init_problem, METH_VARARGS, "Initialize the heat equation problem"},
+// Define methods
+static PyMethodDef PyHeatMethods[] = {
+    {"init_problem", init_problem, METH_VARARGS, "Initialize a heat problem"},
+    {"init_solution", init_solution, METH_VARARGS, "Initialize a heat solution"},
     {"solve_heat_equation", solve_heat_equation, METH_VARARGS, "Solve the heat equation"},
-    {NULL, NULL, 0, NULL} /* Sentinel */
+    {NULL, NULL, 0, NULL} // Sentinel
 };
 
-// Define the module structure
-static struct PyModuleDef heatmodule = {
+
+// Define module
+static struct PyModuleDef pyheatmodule = {
     PyModuleDef_HEAD_INIT,
-    "pyheat", /* name of module */
-    NULL,  /* module documentation, may be NULL */
-    -1,    /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-    HeatMethods
+    "pyheat",
+    NULL, // Documentation
+    -1, // Size of per-interpreter state of the module
+    PyHeatMethods
 };
 
-// Initialize the module
+// Initialize module
 PyMODINIT_FUNC PyInit_pyheat(void) {
-    // Debugging statement to confirm the function is called
-    printf("Initializing pyheat module\n");
-    return PyModule_Create(&heatmodule);
+    return PyModule_Create(&pyheatmodule);
 }
