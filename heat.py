@@ -1,17 +1,20 @@
 import pyheat
+import sys
 
-# Initialize the problems
-prob_index = pyheat.init_problem(0.25, 8.2e-8)
+# Initialize the problem with material properties and boundary conditions
+prob_index = pyheat.init_problem(0.25, 8.2e-8, 1, 0, "const(1)")
 print(f"Initialized Problem Index: {prob_index}")
 
-# Initialize the solutions using the problem index
-sol_index1 = pyheat.init_solution(prob_index, 0.01, 0.0001, 100)
-sol_index2 = pyheat.init_solution(prob_index, 0.02, 0.0002, 100)
-print(f"Initialized Solution Indices: {sol_index1}, {sol_index2}")
+# Initialize the solution for the problem with numerical model parameters
+sol_index = pyheat.init_solution(prob_index, 0.01, 0.0001, 0.05, 100)
+print(f"Initialized Solution Index: {sol_index}")
 
-# Solve the heat equations using the solution indices
-result1 = pyheat.solve_heat_equation(sol_index1, prob_index, 10.0, 100, 233.15, 294.261)
-result2 = pyheat.solve_heat_equation(sol_index2, prob_index, 10.0, 100, 233.15, 294.261)
+# Run the simulation with the initialized solution and save settings
+run_index = pyheat.run_simulation(sol_index, "wood-at-const-1", 1000, 100)
+if run_index < 0:
+    print("Problem running simulation")
+    sys.exit(1)
 
-# Print the results
-print(f"Results: {result1}, {result2}")
+# Assuming return_simulation_results is another function you might implement
+results = pyheat.return_simulation_results(run_index, 0.0004)
+print(f"Simulation results at t=0.0004: {results}")
