@@ -1,6 +1,6 @@
 #include <Python.h>
 #include <stdlib.h>
-#include "heat.h"  // Include the header for the heat equation solver
+#include "heat.h"  // Includes the header for the heat equation solver
 
 // declaring object name and type
 extern int
