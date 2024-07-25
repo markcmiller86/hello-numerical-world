@@ -30,6 +30,7 @@ typedef struct {
     double dt;      // t-increment (seconds)
     double maxt;    // Maximum simulation time
     int nx;         // Number of samples
+    int probIndex;  // Index of the associated problem
     double uk[MAX_NX];  // Array of u(x,k) to compute/return
     double uk1[MAX_NX]; // Array u(x,k-1) computed at -1 time index ago
 } HeatSolution;
@@ -83,6 +84,7 @@ static PyObject* init_solution(PyObject *self, PyObject *args) {
     solutions[solutionIndex].dt = dt;
     solutions[solutionIndex].maxt = maxt;
     solutions[solutionIndex].nx = nx;
+    solutions[solutionIndex].probIndex = probIndex;  // Set the problem index
 
     // Initialize uk and uk1 with initial conditions (i.e., zero)
     for (int i = 0; i < nx; i++) {
@@ -100,7 +102,7 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
     char* run_name;
     int savi, outi;
     // Parse arguments from Python: solution index, run_name, savi, outi
-    if (!PyArg_ParseTuple(args, "issi", &solIndex, &run_name, &savi, &outi)) {
+    if (!PyArg_ParseTuple(args, "isii", &solIndex, &run_name, &savi, &outi)) {
         return NULL;
     }
 
@@ -109,9 +111,12 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
     runs[runIndex].savi = savi;
     runs[runIndex].outi = outi;
 
-    // Retrieve the problem and solution structures using their indices
-    HeatProblem *prob = &problems[solutionIndex];
+    // Retrieve the solution structure using its index
     HeatSolution *sol = &solutions[solIndex];
+
+    // Retrieve the associated problem structure using the problem index
+    int probIndex = sol->probIndex;
+    HeatProblem *prob = &problems[probIndex];
 
     // Calculate the number of time steps
     int time_steps = (int)(sol->maxt / sol->dt);
@@ -130,11 +135,27 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
     return PyLong_FromLong((long)(stable ? runIndex++ : -1));
 }
 
+// Function to return simulation results
+static PyObject* return_simulation_results(PyObject *self, PyObject *args) {
+    int runIndex;
+    double t;
+    // Parse arguments from Python: run index, time t
+    if (!PyArg_ParseTuple(args, "id", &runIndex, &t)) {
+        return NULL;
+    }
+
+    // For now, return a placeholder result
+    PyObject *result = PyList_New(0);
+    PyList_Append(result, Py_BuildValue("d", t));  // Example: return time t as a result
+    return result;
+}
+
 // Define methods exposed to Python
 static PyMethodDef PyHeatMethods[] = {
     {"init_problem", init_problem, METH_VARARGS, "Initialize a heat problem"},
     {"init_solution", init_solution, METH_VARARGS, "Initialize a heat solution"},
     {"run_simulation", run_simulation, METH_VARARGS, "Run the heat simulation"},
+    {"return_simulation_results", return_simulation_results, METH_VARARGS, "Return simulation results"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
 
