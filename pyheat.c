@@ -9,65 +9,80 @@ update_solution_ftcs(int n,
     Number alpha, Number dx, Number dt,
     Number bc_0, Number bc_1);
 
+// Maximum number of problems, solutions, and runs that can be handled
+#define MAX_PROBLEMS 10
+#define MAX_SOLUTIONS 10
+#define MAX_RUNS 10
+#define MAX_NX 1000  // Maximum number of samples for solutions
 
 // Defines a structure to hold problem data
 typedef struct {
-    double lenx;    // material length (meters)
-    double alpha;   // material thermal diffusivity (sq-meters/second)
+    double lenx;    // Material length (meters)
+    double alpha;   // Material thermal diffusivity (sq-meters/second)
+    double bc0;     // Boundary condition at x=0
+    double bc1;     // Boundary condition at x=lenx
+    char* ic;       // Initial condition (e.g., "const(1)")
 } HeatProblem;
 
 // Defines a structure to hold solution data
 typedef struct {
     double dx;      // x (lenx) increment (meters)
     double dt;      // t-increment (seconds)
-    int nx;         // number of samples (from ftcs.c)
-    double *uk;     // new array of u(x,k) to compute/return (from ftcs.c)
-    double *uk1;    // array u(x,k-1) computed @ -1 time index ago (from ftcs.c)
+    double maxt;    // Maximum simulation time
+    int nx;         // Number of samples
+    double uk[MAX_NX];  // Array of u(x,k) to compute/return
+    double uk1[MAX_NX]; // Array u(x,k-1) computed at -1 time index ago
 } HeatSolution;
 
 // Defines a structure to hold run data
 typedef struct {
-    // Placeholder for future run-specific variables if needed
+    char* run_name; // Name of the run
+    int savi;       // How often temperature profile is saved
+    int outi;       // How often progress is reported
 } HeatRun;
 
 // Global arrays to hold instances of problem, solution, and run data
-static HeatProblem problems[10]; // array to hold problem "object", maxed at 10
-static HeatSolution solutions[10]; // array to hold solution "object", maxed at 10
-static HeatRun runs[10]; // array to hold run "object", maxed at 10
-static int problemIndex = 0; 
-static int solutionIndex = 0;
-static int runIndex = 0;
+static HeatProblem problems[MAX_PROBLEMS];
+static HeatSolution solutions[MAX_SOLUTIONS];
+static HeatRun runs[MAX_RUNS];
+static int problemIndex = 0;  // Tracks the next available index for problems
+static int solutionIndex = 0; // Tracks the next available index for solutions
+static int runIndex = 0;      // Tracks the next available index for runs
 
 // Function to initialize the heat equation problem
 static PyObject* init_problem(PyObject *self, PyObject *args) {
-    double lenx, alpha;
-    if (!PyArg_ParseTuple(args, "dd", &lenx, &alpha)) {
+    double lenx, alpha, bc0, bc1;
+    char* ic;
+    // Parse arguments from Python: lenx, alpha, bc0, bc1, ic
+    if (!PyArg_ParseTuple(args, "dddds", &lenx, &alpha, &bc0, &bc1, &ic)) {
         return NULL;
     }
 
+    // Initialize the problem structure
     problems[problemIndex].lenx = lenx;
     problems[problemIndex].alpha = alpha;
+    problems[problemIndex].bc0 = bc0;
+    problems[problemIndex].bc1 = bc1;
+    problems[problemIndex].ic = ic;
 
+    // Return the index of the initialized problem
     return PyLong_FromLong((long)problemIndex++);
 }
 
 // Function to initialize the heat equation solution
 static PyObject* init_solution(PyObject *self, PyObject *args) {
     int probIndex, nx;
-    double dx, dt;
-    if (!PyArg_ParseTuple(args, "iddi", &probIndex, &dx, &dt, &nx)) {
+    double dx, dt, maxt;
+    // Parse arguments from Python: problem index, dx, dt, maxt, nx
+    if (!PyArg_ParseTuple(args, "idddi", &probIndex, &dx, &dt, &maxt, &nx)) {
         return NULL;
     }
 
+    // Initialize the solution structure
     solutions[solutionIndex].dx = dx;
     solutions[solutionIndex].dt = dt;
+    solutions[solutionIndex].maxt = maxt;
     solutions[solutionIndex].nx = nx;
-    solutions[solutionIndex].uk = (double *)malloc(nx * sizeof(double));
-    solutions[solutionIndex].uk1 = (double *)malloc(nx * sizeof(double));
-
-    if (!solutions[solutionIndex].uk || !solutions[solutionIndex].uk1) {
-        return PyErr_NoMemory();
-    }
 
     // Initialize uk and uk1 with initial conditions (i.e., zero)
     for (int i = 0; i < nx; i++) {
@@ -75,45 +90,53 @@ static PyObject* init_solution(PyObject *self, PyObject *args) {
         solutions[solutionIndex].uk1[i] = 0.0;
     }
 
+    // Return the index of the initialized solution
     return PyLong_FromLong((long)solutionIndex++);
 }
 
-
-// Function to solve the heat equation
-static PyObject* solve_heat_equation(PyObject *self, PyObject *args) {
-    int solIndex, probIndex;
-    double maxt, bc0, bc1;
-    int nt;
-
-    if (!PyArg_ParseTuple(args, "iididd", &solIndex, &probIndex, &maxt, &nt, &bc0, &bc1)) {
+// Function to run the heat equation simulation
+static PyObject* run_simulation(PyObject *self, PyObject *args) {
+    int solIndex;
+    char* run_name;
+    int savi, outi;
+    // Parse arguments from Python: solution index, run_name, savi, outi
+    if (!PyArg_ParseTuple(args, "issi", &solIndex, &run_name, &savi, &outi)) {
         return NULL;
     }
 
-    HeatProblem *prob = &problems[probIndex];
+    // Initialize the run structure
+    runs[runIndex].run_name = run_name;
+    runs[runIndex].savi = savi;
+    runs[runIndex].outi = outi;
+
+    // Retrieve the problem and solution structures using their indices
+    HeatProblem *prob = &problems[solutionIndex];
     HeatSolution *sol = &solutions[solIndex];
 
+    // Calculate the number of time steps
+    int time_steps = (int)(sol->maxt / sol->dt);
     int stable = 1;
-    int time_steps = (int)(maxt / sol->dt);
 
+    // Run the simulation using the FTCS method
     for (int t = 0; t < time_steps; t++) {
-        stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, bc0, bc1);
+        stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
         if (!stable) {
             PyErr_SetString(PyExc_RuntimeError, "Solution became unstable");
             return NULL;
         }
     }
 
-    return PyFloat_FromDouble(sol->uk[sol->nx - 1]);  // Example return [need to adjust]
+    // Return the index of the run if successful, otherwise return -1
+    return PyLong_FromLong((long)(stable ? runIndex++ : -1));
 }
 
-// Define methods
+// Define methods exposed to Python
 static PyMethodDef PyHeatMethods[] = {
     {"init_problem", init_problem, METH_VARARGS, "Initialize a heat problem"},
     {"init_solution", init_solution, METH_VARARGS, "Initialize a heat solution"},
-    {"solve_heat_equation", solve_heat_equation, METH_VARARGS, "Solve the heat equation"},
+    {"run_simulation", run_simulation, METH_VARARGS, "Run the heat simulation"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
-
 
 // Define module
 static struct PyModuleDef pyheatmodule = {
