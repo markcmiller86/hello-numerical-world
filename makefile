@@ -39,8 +39,10 @@ help:
 	@echo "    heat-single: makes the heat application with single precision" 
 	@echo "    heat-double: makes the heat application with double precision" 
 	@echo "    heat-long-double: makes the heat application with long-double precision" 
+	@echo "    pyheat.so: makes the python-extension of the heat application"
 	@echo "    PTOOL=[gnuplot,matplotlib,visit] RUNAME=<run-dir-name> plot: plots results"
 	@echo "    check: runs various tests confirming steady-state is linear"
+
 
 
 # Linking the final heat app
@@ -146,8 +148,8 @@ PYTHON_INCLUDES := $(shell python3-config --includes)
 PYTHON_LDFLAGS := $(shell python3-config --ldflags) -lpython3.12
 
 # Target to build the Python extension module
-pyheat.so: $(pyOBJ) ftcs.o
-	cc -shared -o $(pySO) $(pyOBJ) ftcs.o -lm $(PYTHON_LDFLAGS)
+pyheat.so: $(pyOBJ) $(OBJ)
+	cc -shared -o $(pySO) $(pyOBJ) $(OBJ) -lm $(PYTHON_LDFLAGS)
 
 # Compile pyheat.c into pyheat.o
 pyheat.o: $(pySRC)
