@@ -9,8 +9,28 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler:
+          - { name: 'clang', version: '13' }
+          - { name: 'clang', version: '14' }
+          - { name: 'clang', version: '15' }
+          - { name: 'gnu', version: '10' }
+          - { name: 'gnu', version: '11' }
+          - { name: 'gnu', version: '12' }
     steps:
     - uses: actions/checkout@v4
     
+    - name: Set up compiler
+      run: |
+        sudo apt-get update
+        if [ "${{ matrix.compiler.name }}" == "gnu" ]; then
+          sudo apt-get install -y g++-${{ matrix.compiler.version }}
+        elif [ "${{ matrix.compiler.name }}" == "clang" ]; then
+          sudo apt-get install -y clang-${{ matrix.compiler.version }}
+        fi
+        
     - name: make check
       run: make check
+      env:
+        CXX: ${{ matrix.compiler.name }}-${{ matrix.compiler.version }}
