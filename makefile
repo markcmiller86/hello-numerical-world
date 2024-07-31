@@ -11,22 +11,26 @@ RUNAME ?= heat_results
 PIPEWIDTH ?= 0.1
 RM = rm
 
-HDR = Number.H Half.H
-SRC = heat.C utils.C args.C exact.C ftcs.C crankn.C dufrank.C
-OBJ = $(SRC:.C=.o)
-GCOV = $(SRC:.C=.C.gcov) $(SRC:.C=.gcda) $(SRC:.C=.gcno) $(HDR:.H=.H.gcov)
+# Headers
+HDR = Number.h heat.h
+# Source Files
+SRC = heat.c utils.c args.c exact.c ftcs.c crankn.c dufrank.c
+# Object Files
+OBJ = $(SRC:.c=.o)
+# Coverage Files
+GCOV = $(SRC:.c=.c.gcov) $(SRC:.c=.gcda) $(SRC:.c=.gcno) $(HDR:.h=.h.gcov)
+# Executable
 EXE = heat
 
 # Implicit rule for object files
-%.o : %.C
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+%.o : %.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 # Help is default target
 help:
 	@echo "Targets:"
 	@echo "    heat: makes the default heat application (double precision)"
 	@echo "    heat-omp: makes default heat application with openmp threads"
-	@echo "    heat-half: makes the heat application with half precision" 
 	@echo "    heat-single: makes the heat application with single precision" 
 	@echo "    heat-double: makes the heat application with double precision" 
 	@echo "    heat-long-double: makes the heat application with long-double precision" 
@@ -36,10 +40,10 @@ help:
 
 # Linking the final heat app
 heat: $(OBJ)
-	$(CXX) -o heat $(OBJ) $(LDFLAGS) -lm
+	$(CC) -o heat $(OBJ) $(LDFLAGS) -lm
 
-heat-omp: CXX=clang
-heat-omp: CXXFLAGS=-fopenmp
+heat-omp: CC=clang
+heat-omp: CFLAGS=-fopenmp
 heat-omp: LDFLAGS=-lomp -lstdc++
 heat-omp: $(OBJ)
 heat-omp: heat
@@ -50,6 +54,7 @@ $(OBJ): $(HDR)
 
 # Convenience variable/target for half-precision
 heat-half: CPPFLAGS=-DFPTYPE=0
+heat-half: CFLAGS=-Wno-format
 heat-half: $(OBJ)
 heat-half: heat
 	mv heat heat-half

@@ -3,19 +3,18 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include <cassert>
+#include <assert.h>
 #ifdef HAVE_FEENABLEEXCEPT
 #define _GNU_SOURCE
 #include <cfenv>
 #endif
-#include <cfloat>
-#include <climits>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <float.h>
+#include <limits.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include <sstream>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -23,5 +22,4 @@
 
 // Lets overlook the fact that we're including one
 // header inside of another just for convenience
-#include "Half.H"
-#include "Number.H"
+#include "Number.h"

@@ -1,6 +1,6 @@
-#include "heat.H"
+#include "heat.h"
 
-bool                        // false if unstable, true otherwise
+int                        // false if unstable, true otherwise
 update_solution_ftcs(
     int n,                  // number of samples
     Number *uk,             // new array of u(x,k) to compute/return
@@ -12,7 +12,7 @@ update_solution_ftcs(
     Number r = alpha * dt / (dx * dx);
 
     // sanity check for stability
-    if (r > 0.5) return false; 
+    if (r > 0.5) return 0; 
 
     // FTCS update algorithm
     #pragma omp parallel for
@@ -23,5 +23,5 @@ update_solution_ftcs(
     uk[0  ] = bc0;
     uk[n-1] = bc1;
 
-    return true;
+    return 1;
 }
