@@ -4,8 +4,8 @@ on:
   push:
     branches: ["CI-CD"]
   pull_request:
-    branches: [ "main" ]
-    
+    branches: ["main"]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,19 +18,20 @@ jobs:
           - { name: 'gnu', version: '10' }
           - { name: 'gnu', version: '11' }
           - { name: 'gnu', version: '12' }
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up compiler
       run: |
         sudo apt-get update
         if [ "${{ matrix.compiler.name }}" == "gnu" ]; then
           sudo apt-get install -y g++-${{ matrix.compiler.version }}
+          export CXX=g++-${{ matrix.compiler.version }}
         elif [ "${{ matrix.compiler.name }}" == "clang" ]; then
           sudo apt-get install -y clang-${{ matrix.compiler.version }}
+          export CXX=clang++-${{ matrix.compiler.version }}
         fi
-        
+
     - name: make check
       run: make check
-      env:
-        CXX: ${{ matrix.compiler.name }}-${{ matrix.compiler.version }}
