@@ -1,5 +1,5 @@
-#include <Python.h>
-#include <stdlib.h>
+#include <Python.h> // For Python C API
+#include <stdlib.h> // For calloc
 #include "heat.h"  // Header for the heat equation solver
 
 
@@ -97,6 +97,7 @@ static PyObject* init_solution(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "idddi", &probIndex, &dx, &dt, &maxt, &nx)) {
         return NULL;
     }
+
     // Check if the maximum number of solutions has been exceeded
       if (solutionIndex >= MAX_SOLUTIONS || probIndex >= problemIndex) {
         PyErr_SetString(PyExc_RuntimeError, "Invalid solution or problem index");
@@ -163,6 +164,10 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
         // Stores the temperature profile at regular intervals
         if ((t > 0 && run->savi) && t%(run->savi)==0) {
            run->times[t] = t*sol->dt; // stores current time
+
+            printf("got here A\n"); // debug
+
+           run->t_results[t] = (double *) calloc(sol->nx, sizeof(double)); // stores current temp
            copy(sol->nx, run->t_results[t], sol->uk); // stores current temperature
         }
 
@@ -182,20 +187,20 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
 
 // Function to return simulation results
 static PyObject* return_simulation_results(PyObject *self, PyObject *args) {
-    int runIndex;
+    int runIn;
     // Parse arguments from Python: run index
-    if (!PyArg_ParseTuple(args, "i", &runIndex)) {
+    if (!PyArg_ParseTuple(args, "i", &runIn)) {
         return NULL;
     }
 
     // Check if the run index is valid
-    if (runIndex < 0 || runIndex >= MAX_RUNS) {
+    if (runIn < 0 || runIn >= MAX_RUNS) {
         PyErr_SetString(PyExc_RuntimeError, "Invalid run index");
         return NULL;
     }
 
-    HeatRun *run = &runs[runIndex];
-    HeatSolution *sol = &solutions[run->solIndex];
+    HeatRun *run = &runs[runIn]; // Retrieve the run structure
+    HeatSolution *sol = &solutions[run->solIndex]; // Retrieve the associated solution structure
 
     // Create a list to hold the results
     PyObject *results = PyList_New(0);
@@ -203,6 +208,9 @@ static PyObject* return_simulation_results(PyObject *self, PyObject *args) {
     int i = 0;
     while (i < MAX_TIMES && run->t_results[i]) {
         // Create a list to hold the temperature results for this time
+
+         printf("got here B\n"); //debug
+
         PyObject *cur_result = PyList_New(0);
         for (int j = 0; j < sol->nx; j++) {
             PyList_Append(cur_result, Py_BuildValue("d", run->t_results[i][j]));
