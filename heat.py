@@ -1,4 +1,4 @@
-import pyheat
+import pyheat # type: ignore
 import sys
 
 # Initialize the problem with material properties and boundary conditions
