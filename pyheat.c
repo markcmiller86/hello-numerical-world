@@ -1,6 +1,12 @@
 #include <Python.h> // For Python C API
 #include <stdlib.h> // For calloc
+#include <string.h> // For strdup
 #include "heat.h"  // Header for the heat equation solver
+
+
+// declare set_initial_condition function from utils.c
+extern void
+set_initial_condition(int n, Number *a, Number dx, char const *ic);
 
 
 // Declare copy function from utils.c
@@ -23,7 +29,8 @@ update_solution_ftcs(int n,
 #define MAX_TIMES 1000 // Maximum number of times stored
 
 // Structure to hold problem data
-typedef struct {
+typedef struct 
+{
     double lenx;    // Material length (meters)
     double alpha;   // Material thermal diffusivity (sq-meters/second)
     double bc0;     // Boundary condition at x=0
@@ -32,7 +39,8 @@ typedef struct {
 } HeatProblem;
 
 // Structure to hold solution data
-typedef struct {
+typedef struct 
+{
     double dx;          // x (lenx) increment (meters)
     double dt;          // t-increment (seconds)
     double maxt;        // Maximum simulation time
@@ -43,7 +51,8 @@ typedef struct {
 } HeatSolution;
 
 // Structure to hold run data
-typedef struct {
+typedef struct 
+{
     char* run_name;     // Name of the run
     int savi;           // How often temperature profile is saved
     int outi;           // How often progress is reported
@@ -63,16 +72,22 @@ static int solutionIndex = 0;
 static int runIndex = 0;      
 
 // Function to initialize the heat equation problem and return its index
-static PyObject* init_problem(PyObject *self, PyObject *args) {
+static PyObject* init_problem(PyObject *self, PyObject *args) 
+{
     double lenx, alpha, bc0, bc1;
     char* ic;
+
     // Parse arguments from Python: lenx, alpha, bc0, bc1, ic
-    if (!PyArg_ParseTuple(args, "dddds", &lenx, &alpha, &bc0, &bc1, &ic)) {
+    if (!PyArg_ParseTuple(args, "dddds", &lenx, &alpha, &bc0, &bc1, &ic)) 
+    {
         return NULL;
+        // [NOTE]: create function to print error messages and then call it here
+        // i.e please make sure to provide the correct arguments (here are the arguments needed)
     }
 
     // Check if the maximum number of problems has been exceeded
-    if (problemIndex >= MAX_PROBLEMS) {
+    if (problemIndex >= MAX_PROBLEMS) 
+    {
     PyErr_SetString(PyExc_RuntimeError, "Maximum number of problems exceeded");
     return NULL;
     }
@@ -83,26 +98,32 @@ static PyObject* init_problem(PyObject *self, PyObject *args) {
     prob->alpha = alpha;    
     prob->bc0 = bc0;
     prob->bc1 = bc1;
-    prob->ic = ic; // may need to dynamically allocate memory to avoid issues related to the scope of the string.
+    prob->ic = strdup(ic); 
 
     // Return the index of the initialized problem
     return PyLong_FromLong((long)problemIndex++);
 }
 
 // Function to initialize the heat equation solution and return its index
-static PyObject* init_solution(PyObject *self, PyObject *args) {
+static PyObject* init_solution(PyObject *self, PyObject *args) 
+{
     int probIndex, nx;
     double dx, dt, maxt;
+    
     // Parse arguments from Python: problem index, dx, dt, maxt, nx
-    if (!PyArg_ParseTuple(args, "idddi", &probIndex, &dx, &dt, &maxt, &nx)) {
+    if (!PyArg_ParseTuple(args, "idddi", &probIndex, &dx, &dt, &maxt, &nx)) 
+    {
         return NULL;
+        // [NOTE]: create function to print error messages and then call it here
+        // i.e please make sure to provide the correct arguments (here are the arguments needed)
     }
 
     // Check if the maximum number of solutions has been exceeded
-      if (solutionIndex >= MAX_SOLUTIONS || probIndex >= problemIndex) {
+      if (solutionIndex >= MAX_SOLUTIONS || probIndex >= problemIndex) 
+      {
         PyErr_SetString(PyExc_RuntimeError, "Invalid solution or problem index");
         return NULL;
-    }
+      }
 
     // Initialize the solution structure
     HeatSolution *sol = &solutions[solutionIndex]; // Get the next available solution index
@@ -112,28 +133,34 @@ static PyObject* init_solution(PyObject *self, PyObject *args) {
     sol->nx = nx;
     sol->probIndex = probIndex;  // Set the problem index
 
-    // Initialize uk and uk1 with initial conditions (i.e., zero)
-    for (int i = 0; i < nx; i++) {
-        solutions[solutionIndex].uk[i] = 0.0;
-        solutions[solutionIndex].uk1[i] = 0.0;
-    }
+    // Retrieve the problem stucture using the problem index
+    HeatProblem *prob = &problems[probIndex];
+
+    // Set the initial condition using the set_initial_condition function from utils.c
+     set_initial_condition(sol->nx, sol->uk1, sol->dx, prob->ic);
 
     // Return the index of the initialized solution
     return PyLong_FromLong((long)solutionIndex++);
 }
 
 // Function to run the heat equation simulation
-static PyObject* run_simulation(PyObject *self, PyObject *args) {
+static PyObject* run_simulation(PyObject *self, PyObject *args) 
+{
     int solIndex;
     char* run_name;
     int savi, outi;
+
     // Parse arguments from Python: solution index, run_name, savi, outi
-    if (!PyArg_ParseTuple(args, "isii", &solIndex, &run_name, &savi, &outi)) {
+    if (!PyArg_ParseTuple(args, "isii", &solIndex, &run_name, &savi, &outi)) 
+    {
         return NULL;
+        // [NOTE]: create function to print error messages and then call it here
+        // i.e please make sure to provide the correct arguments (here are the arguments needed)
     }
 
     // Check if the maximum number of runs has been exceeded
-    if (runIndex >= MAX_RUNS || solIndex >= solutionIndex) {
+    if (runIndex >= MAX_RUNS || solIndex >= solutionIndex) 
+    {
         PyErr_SetString(PyExc_RuntimeError, "Invalid solution or run index");
         return NULL;
     }
@@ -148,9 +175,10 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
 
     // Retrieve the solution structure using its index
     HeatSolution *sol = &solutions[solIndex];
+    
+    int probIndex = sol->probIndex; // Get the problem index associated with the solution
 
     // Retrieve the associated problem structure using the problem index
-    int probIndex = sol->probIndex;
     HeatProblem *prob = &problems[probIndex];
 
     // Calculate the number of time steps
@@ -158,24 +186,25 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
     int stable = 1;
 
     // Run the simulation using the FTCS method
-    for (int t = 0; t < time_steps; t++) {
+    for (int t = 0; t < time_steps; t++) 
+    {
         stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
 
         // Stores the temperature profile at regular intervals
-        if ((t > 0 && run->savi) && t%(run->savi)==0) {
+        if ((t > 0 && run->savi) && t % (run->savi) == 0) 
+        {
            run->times[t] = t*sol->dt; // stores current time
-
-            printf("got here A\n"); // debug
-
            run->t_results[t] = (double *) calloc(sol->nx, sizeof(double)); // stores current temp
-           copy(sol->nx, run->t_results[t], sol->uk); // stores current temperature
+
+           copy(sol->nx, run->t_results[t], sol->uk); // copy current temp to t_results
         }
 
         // Copy current results to array using copy function from utils.c
         copy(sol->nx, sol->uk1, sol->uk);
         
         // Check if the solution became unstable
-        if (!stable) {
+        if (!stable) 
+        {
             PyErr_SetString(PyExc_RuntimeError, "Solution became unstable");
             return NULL;
         }
@@ -186,33 +215,44 @@ static PyObject* run_simulation(PyObject *self, PyObject *args) {
 }
 
 // Function to return simulation results
-static PyObject* return_simulation_results(PyObject *self, PyObject *args) {
-    int runIn;
+static PyObject* return_simulation_results(PyObject *self, PyObject *args) 
+{
+    int runIn; // Run index
+    
     // Parse arguments from Python: run index
-    if (!PyArg_ParseTuple(args, "i", &runIn)) {
+    if (!PyArg_ParseTuple(args, "i", &runIn)) 
+    {
         return NULL;
+        // [NOTE]: create function to print error messages and then call it here
+        // i.e please make sure to provide the correct arguments (here are the arguments needed)
     }
 
     // Check if the run index is valid
-    if (runIn < 0 || runIn >= MAX_RUNS) {
+    if (runIn < 0 || runIn >= MAX_RUNS) 
+    {
         PyErr_SetString(PyExc_RuntimeError, "Invalid run index");
         return NULL;
     }
 
-    HeatRun *run = &runs[runIn]; // Retrieve the run structure
+    HeatRun *run = &runs[runIn]; // Retrieve the associated run structure
     HeatSolution *sol = &solutions[run->solIndex]; // Retrieve the associated solution structure
 
     // Create a list to hold the results
     PyObject *results = PyList_New(0);
 
     int i = 0;
-    while (i < MAX_TIMES && run->t_results[i]) {
+    while (i < MAX_TIMES) 
+    {
         // Create a list to hold the temperature results for this time
-
-         printf("got here B\n"); //debug
+        if (run->t_results[i] == NULL)
+        {
+            i++;
+            continue;
+        }
 
         PyObject *cur_result = PyList_New(0);
-        for (int j = 0; j < sol->nx; j++) {
+        for (int j = 0; j < sol->nx; j++) 
+        {
             PyList_Append(cur_result, Py_BuildValue("d", run->t_results[i][j]));
         }
         PyList_Append(results, cur_result);
@@ -223,7 +263,8 @@ static PyObject* return_simulation_results(PyObject *self, PyObject *args) {
 }
 
 // Define methods exposed to Python
-static PyMethodDef PyHeatMethods[] = {
+static PyMethodDef PyHeatMethods[] = 
+{
     {"init_problem", init_problem, METH_VARARGS, "Initialize a heat problem"},
     {"init_solution", init_solution, METH_VARARGS, "Initialize a heat solution"},
     {"run_simulation", run_simulation, METH_VARARGS, "Run the heat simulation"},
@@ -232,7 +273,8 @@ static PyMethodDef PyHeatMethods[] = {
 };
 
 // Define module
-static struct PyModuleDef pyheatmodule = {
+static struct PyModuleDef pyheatmodule = 
+{
     PyModuleDef_HEAD_INIT,
     "pyheat",
     NULL, // Documentation
@@ -241,6 +283,7 @@ static struct PyModuleDef pyheatmodule = {
 };
 
 // Initialize module
-PyMODINIT_FUNC PyInit_pyheat(void) {
+PyMODINIT_FUNC PyInit_pyheat(void) 
+{
     return PyModule_Create(&pyheatmodule);
 }
