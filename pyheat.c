@@ -243,14 +243,15 @@ static PyObject* return_simulation_results(PyObject *self, PyObject *args)
     int i = 0;
     while (i < MAX_TIMES) 
     {
-        // Create a list to hold the temperature results for this time
-        if (run->t_results[i] == NULL)
+        if (run->t_results[i] == NULL) // Check if the time index is empty
         {
             i++;
             continue;
         }
 
+        // Create a list to hold the temperature results for this time
         PyObject *cur_result = PyList_New(0);
+        
         for (int j = 0; j < sol->nx; j++) 
         {
             PyList_Append(cur_result, Py_BuildValue("d", run->t_results[i][j]));
