@@ -71,8 +71,38 @@ static int problemIndex = 0;
 static int solutionIndex = 0; 
 static int runIndex = 0;      
 
+PyDoc_STRVAR(problem_doc,
+"problem(lenx, alpha, bc0, bc1, ic)\n"
+"=======================================\n"
+"\n"
+"Initialize a heat problem with the given parameters.\n"
+"\n"
+"Parameters\n"
+"----------\n"
+"lenx : float\n"
+"    Length of the material in meters.\n"
+"alpha : float\n"
+"    Thermal diffusivity of the material (sq-meters/second).\n"
+"bc0 : float\n"
+"    Boundary condition at x=0.\n"
+"bc1 : float\n"
+"    Boundary condition at x=lenx.\n"
+"ic : str\n"
+"    Initial condition string (e.g., 'const(1)').\n"
+"\n"
+"Returns\n"
+"-------\n"
+"int\n"
+"    Index of the initialized problem.\n"
+"\n"
+"Example\n"
+"-------\n"
+"index = problem(1.0, 0.01, 100, 200, 'const(1)')\n"
+"print(f'Initialized problem with index: {index}')\n"
+);
+
 // Function to initialize the heat equation problem and return its index
-static PyObject* init_problem(PyObject *self, PyObject *args) 
+static PyObject* problem(PyObject *self, PyObject *args) 
 {
     double lenx, alpha, bc0, bc1;
     char* ic;
@@ -80,6 +110,7 @@ static PyObject* init_problem(PyObject *self, PyObject *args)
     // Parse arguments from Python: lenx, alpha, bc0, bc1, ic
     if (!PyArg_ParseTuple(args, "dddds", &lenx, &alpha, &bc0, &bc1, &ic)) 
     {
+        PyErr_SetString(PyExc_TypeError, problem_doc); // returns problem_doc if incorrect arguments
         return NULL;
         // [NOTE]: create function to print error messages and then call it here
         // i.e please make sure to provide the correct arguments (here are the arguments needed)
@@ -105,7 +136,7 @@ static PyObject* init_problem(PyObject *self, PyObject *args)
 }
 
 // Function to initialize the heat equation solution and return its index
-static PyObject* init_solution(PyObject *self, PyObject *args) 
+static PyObject* solution(PyObject *self, PyObject *args) 
 {
     int probIndex, nx;
     double dx, dt, maxt;
@@ -144,7 +175,7 @@ static PyObject* init_solution(PyObject *self, PyObject *args)
 }
 
 // Function to run the heat equation simulation
-static PyObject* run_simulation(PyObject *self, PyObject *args) 
+static PyObject* run(PyObject *self, PyObject *args) 
 {
     int solIndex;
     char* run_name;
@@ -215,7 +246,7 @@ static PyObject* run_simulation(PyObject *self, PyObject *args)
 }
 
 // Function to return simulation results
-static PyObject* return_simulation_results(PyObject *self, PyObject *args) 
+static PyObject* results(PyObject *self, PyObject *args) 
 {
     int runIn; // Run index
     
@@ -266,10 +297,10 @@ static PyObject* return_simulation_results(PyObject *self, PyObject *args)
 // Define methods exposed to Python
 static PyMethodDef PyHeatMethods[] = 
 {
-    {"init_problem", init_problem, METH_VARARGS, "Initialize a heat problem"},
-    {"init_solution", init_solution, METH_VARARGS, "Initialize a heat solution"},
-    {"run_simulation", run_simulation, METH_VARARGS, "Run the heat simulation"},
-    {"return_simulation_results", return_simulation_results, METH_VARARGS, "Return simulation results"},
+    {"problem", problem, METH_VARARGS,  problem_doc},
+    {"solution", solution, METH_VARARGS, "Initialize a heat solution"},
+    {"run", run, METH_VARARGS, "Run the heat simulation"},
+    {"results", results, METH_VARARGS, "Return simulation results"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
 
