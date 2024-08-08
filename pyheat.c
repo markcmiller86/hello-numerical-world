@@ -1,11 +1,10 @@
 #include <Python.h> // For Python C API
 #include <stdlib.h> // For calloc
 #include <string.h> // For strdup
-#include "heat.h"  // Header for the heat equation solver
+#include "heat.h"   // Header for the heat equation solver
 
 
 // Macros
-
 #define MAX_PROBLEMS 10    // Maximum number of problems
 #define MAX_SOLUTIONS 10   // Maximum number of solutions
 #define MAX_RUNS 10        // Maximum number of runs
@@ -13,7 +12,6 @@
 #define MAX_TIMES 1000     // Maximum number of times stored
 
 // Structures
-
 typedef struct      // Holds problem data
 {
     double lenx;    // Material length (meters)
@@ -45,19 +43,16 @@ typedef struct          // Holds run data
 } HeatRun;
 
 // Global Arrays 
-
 static HeatProblem problems[MAX_PROBLEMS];
 static HeatSolution solutions[MAX_SOLUTIONS];
 static HeatRun runs[MAX_RUNS];
 
 // Global Indexes
-
 static int problemIndex = 0; 
 static int solutionIndex = 0;
 static int runIndex = 0;
 
 // Utilties
-
 extern void // set_initial_condition function from utils.c
 set_initial_condition(int n, Number *a, Number dx, char const *ic);
 
