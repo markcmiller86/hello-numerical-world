@@ -26,12 +26,13 @@ jobs:
       run: |
         sudo apt-get update
         if [ "${{ matrix.compiler.name }}" == "gnu" ]; then
-          sudo apt-get install -y g++-${{ matrix.compiler.version }}
-          export CXX=g++-${{ matrix.compiler.version }}
+          sudo apt-get install -y gcc-${{ matrix.compiler.version }} g++-${{ matrix.compiler.version }}
+          export CC=gcc-${{ matrix.compiler.version }}
         elif [ "${{ matrix.compiler.name }}" == "clang" ]; then
           sudo apt-get install -y clang-${{ matrix.compiler.version }}
-          export CXX=clang++-${{ matrix.compiler.version }}
+          export CC=clang-${{ matrix.compiler.version }}
         fi
 
     - name: make check
-      run: make check
+      run: 
+        make check
