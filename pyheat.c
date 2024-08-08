@@ -291,7 +291,7 @@ static PyObject* results(PyObject *self, PyObject *args)
     return results;
 }
 
-// Module-level documentation
+// Documentation for the module
 PyDoc_STRVAR(module_doc,
 "\n"
 "Why is this module useful?\n"
