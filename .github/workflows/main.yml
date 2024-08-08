@@ -26,14 +26,17 @@ jobs:
       run: |
         sudo apt-get update
         if [ "${{ matrix.compiler.name }}" == "gnu" ]; then
-          sudo apt-get install -y gcc-${{ matrix.compiler.version }}
-          export CC=gcc-${{ matrix.compiler.version }}
+          sudo apt-get install -y gcc-${{ matrix.compiler.version }} g++-${{ matrix.compiler.version }}
+          echo "CC=gcc-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.compiler.version }}" >> $GITHUB_ENV
         elif [ "${{ matrix.compiler.name }}" == "clang" ]; then
           sudo apt-get install -y clang-${{ matrix.compiler.version }}
-          export CC=clang-${{ matrix.compiler.version }}
+          echo "CC=clang-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.compiler.version }}" >> $GITHUB_ENV
         fi
 
     - name: Build and test
       run: make check
       env:
         CC: ${{ env.CC }}
+        CXX: ${{ env.CXX }}
