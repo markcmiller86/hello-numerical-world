@@ -4,32 +4,17 @@
 #include "heat.h"  // Header for the heat equation solver
 
 
-// declare set_initial_condition function from utils.c
-extern void
-set_initial_condition(int n, Number *a, Number dx, char const *ic);
+// Macros
 
+#define MAX_PROBLEMS 10    // Maximum number of problems
+#define MAX_SOLUTIONS 10   // Maximum number of solutions
+#define MAX_RUNS 10        // Maximum number of runs
+#define MAX_NX 1000        // Maximum number of samples for solutions
+#define MAX_TIMES 1000     // Maximum number of times stored
 
-// Declare copy function from utils.c
-extern void
-copy(int n, Number *dst, Number const *src);
+// Structures
 
-
-// Declare update_solution_ftcs function from ftcs.c
-extern int
-update_solution_ftcs(int n,
-    Number *curr, Number const *back1,
-    Number alpha, Number dx, Number dt,
-    Number bc_0, Number bc_1);
-
-// Maximum number of problems, solutions, and runs that can be handled
-#define MAX_PROBLEMS 10
-#define MAX_SOLUTIONS 10
-#define MAX_RUNS 10
-#define MAX_NX 1000    // Maximum number of samples for solutions
-#define MAX_TIMES 1000 // Maximum number of times stored
-
-// Structure to hold problem data
-typedef struct 
+typedef struct      // Holds problem data
 {
     double lenx;    // Material length (meters)
     double alpha;   // Material thermal diffusivity (sq-meters/second)
@@ -38,8 +23,7 @@ typedef struct
     char* ic;       // Initial condition (e.g., "const(1)")
 } HeatProblem;
 
-// Structure to hold solution data
-typedef struct 
+typedef struct          // Holds solution data
 {
     double dx;          // x (lenx) increment (meters)
     double dt;          // t-increment (seconds)
@@ -50,8 +34,7 @@ typedef struct
     double uk1[MAX_NX]; // Array u(x,k-1) computed at -1 time index ago
 } HeatSolution;
 
-// Structure to hold run data
-typedef struct 
+typedef struct          // Holds run data
 {
     char* run_name;     // Name of the run
     int savi;           // How often temperature profile is saved
@@ -61,15 +44,37 @@ typedef struct
     int solIndex;       // Index of the associated solution
 } HeatRun;
 
-// Global arrays to hold instances of problem, solution, and run data
+// Global Arrays 
+
 static HeatProblem problems[MAX_PROBLEMS];
 static HeatSolution solutions[MAX_SOLUTIONS];
 static HeatRun runs[MAX_RUNS];
 
-// Global variables to track the next available index for problems, solutions, and runs
-static int problemIndex = 0;  
-static int solutionIndex = 0; 
-static int runIndex = 0; 
+// Global Indexes
+
+static int problemIndex = 0; 
+static int solutionIndex = 0;
+static int runIndex = 0;
+
+// Utilties
+
+extern void // set_initial_condition function from utils.c
+set_initial_condition(int n, Number *a, Number dx, char const *ic);
+
+extern void // copy function from utils.c
+copy(int n, Number *dst, Number const *src);
+
+extern int // update_solution_ftcs function from ftcs.c
+update_solution_ftcs(int n,
+    Number *curr, Number const *back1,
+    Number alpha, Number dx, Number dt,
+    Number bc_0, Number bc_1);
+
+extern int // update_solution_dufrank function from dufrank.c
+update_solution_dufrank(int n, Number *curr,
+    Number const *back1, Number const *back2,
+    Number alpha, Number dx, Number dt,
+    Number bc_0, Number bc_1);
 
 // Function to initialize the heat equation problem and return its index
 static PyObject* problem(PyObject *self, PyObject *args) 
@@ -291,6 +296,111 @@ static PyObject* results(PyObject *self, PyObject *args)
     return results;
 }
 
+// Module-level documentation
+PyDoc_STRVAR(module_doc,
+"\n"
+"Why is this module useful?\n"
+"--------------------------\n"
+"\n"
+"This module provides a Python interface to the heat equation solver.\n"
+"In doing so we can define heat problems, solutions, and runs in Python.\n"
+"This achieves a high-level interface to the low-level C heat solver." 
+"We obtain the following benefits:\n"
+"    Interactivity: We can define and run simulations interactively in Python.\n"
+"    Flexibility: We can easily change parameters and rerun simulations.\n"
+"    Visualization: We can visualize results using Python libraries.\n"
+"    Usability: Provides users familar with Python an easy way to use the heat solver.\n"
+"\n"
+"How does the Python C API work?\n"
+"--------------------------------\n"
+"\n"
+"The Python C API allows us to write C extensions for Python.\n"
+"This means we can write C code that can be imported and used in Python.\n"
+"The API provides functions and macros to interact with Python objects.\n"
+"Using the API we can define functions, classes, and modules in C.\n"
+"For more information see: https://docs.python.org/3/c-api/\n"
+"\n"
+"Structure of the module:\n"
+"-----------------------\n"
+"\n"
+"This module is split into four parts:\n"
+"    1. Problem: Initialize a heat problem with given parameters.\n"
+"    2. Solution: Initialize a heat solution with given parameters.\n"
+"    3. Run: Run the heat simulation with given parameters.\n"
+"    4. Results: Retrieve the simulation results for a given run.\n"
+"\n"
+"Each part takes corresponding function from the heat solver and exposes it to Python\n"
+"\n"
+"It is designed to be used sequentially: problem -> solution -> run -> results\n"
+"We enter the parameters for each part and use the returned index to move to the next part.\n"
+"We ensure that the user follows this sequence by checking the indices of problems, solutions, and runs.\n"
+"\n"
+"Arguments used in each part:\n"
+"    Problem:\n" 
+"        lenx: Length of the material in meters.\n"
+"        alpha: Thermal diffusivity of the material (sq-meters/second).\n"
+"        bc0: Boundary condition at x=0.\n"
+"        bc1: Boundary condition at x=lenx.\n"
+"        ic: Initial condition string (e.g., 'const(1)').\n"
+"    Solution:\n"
+"        probIndex: Index of the associated problem.\n"
+"        dx: x (lenx) increment in meters.\n"
+"        dt: t-increment in seconds.\n"
+"        maxt: Maximum simulation time in seconds.\n"
+"        nx: Number of samples.\n"
+"    Run:\n"
+"        solIndex: Index of the associated solution.\n"
+"        run_name: Name of the run.\n"
+"        savi: How often the temperature profile is saved.\n"
+"        outi: How often the progress is reported.\n"
+"    Results:\n"
+"        runIndex: Index of the run.\n"
+"\n"
+"From here we can then use results to interact with the data and visualize the simulation results.\n"
+"\n"
+"The user can type the following help() commands to get more information on each part.\n"
+"    help(pyheat.problem)\n"
+"    help(pyheat.solution)\n"
+"    help(pyheat.run)\n"
+"    help(pyheat.results)\n"
+"\n"
+"How the example script heat.py works:\n"
+"--------------------------------\n"
+"\n"
+"The example script heat.py demonstrates how to use this module.\n"
+"It initializes a problem, solution, and run, runs the simulation, and retrieves the results.\n"
+"The script then visualizes the results using the matplotlib library.\n"
+"\n"
+"How to use with matlpotlib:\n"
+"--------------------------\n"
+"\n"
+"Once you have the simulation results you can use the matplotlib library to visualize the results.\n"
+"[Note: please ensure you import matlopib.pyplot as plt and sys in your script]\n"
+"Here is an example script that visualizes the results:\n"
+"\n"
+"x = []\n # x values are the distance values\n"
+"for i in range (0,100): \n"
+"    x.append(i*0.01) # iterates through the x values\n"
+"y = results[4] # y values are the temperature values"
+"\n"
+"plt.xlabel('Distance (meters)')\n"
+"plt.ylabel('Temperature (Kelvin)')\n"
+"plt.plot(x,y)\n"
+"plt.show()\n"
+"sys.exit(0)\n"
+"\n"
+"How to integrate with numpy:\n"
+"--------------------------\n"
+"\n"
+"Once you have the simulation results you can use the numpy library to perform numerical operations.\n"
+"[Note: please sure you import numpy as np and sys in your script]\n"
+"Here is an example script that integrates the temperature profile using numpy:\n"
+"\n"
+"... \n"
+"... \n"
+"\n"
+);
+
 // Documentation for the problem function
 PyDoc_STRVAR(problem_doc,
 "\n"
@@ -411,116 +521,6 @@ PyDoc_STRVAR(results_doc,
 "results = pyheat.results(run)\n"
 "print(f'Simulation results: {results}')\n"
 );
-
-// Module-level documentation
-PyDoc_STRVAR(module_doc,
-"\n"
-"Why is this module useful?\n"
-"--------------------------\n"
-"\n"
-"This module provides a Python interface to the heat equation solver.\n"
-"In doing so we can define heat problems, solutions, and runs in Python.\n"
-"This achieves a high-level interface to the low-level C heat solver." 
-"We obtain the following benefits:\n"
-"    Interactivity: We can define and run simulations interactively in Python.\n"
-"    Flexibility: We can easily change parameters and rerun simulations.\n"
-"    Visualization: We can visualize results using Python libraries.\n"
-"    Usability: Provides users familar with Python an easy way to use the heat solver.\n"
-"\n"
-"How does the Python C API work?\n"
-"--------------------------------\n"
-"\n"
-"The Python C API allows us to write C extensions for Python.\n"
-"This means we can write C code that can be imported and used in Python.\n"
-"The API provides functions and macros to interact with Python objects.\n"
-"Using the API we can define functions, classes, and modules in C.\n"
-"For more information see: https://docs.python.org/3/c-api/\n"
-"\n"
-"Structure of the module:\n"
-"-----------------------\n"
-"\n"
-"This module is split into four parts:\n"
-"    1. Problem: Initialize a heat problem with given parameters.\n"
-"    2. Solution: Initialize a heat solution with given parameters.\n"
-"    3. Run: Run the heat simulation with given parameters.\n"
-"    4. Results: Retrieve the simulation results for a given run.\n"
-"\n"
-"Each part takes corresponding function from the heat solver and exposes it to Python\n"
-"\n"
-"It is designed to be used sequentially: problem -> solution -> run -> results\n"
-"We enter the parameters for each part and use the returned index to move to the next part.\n"
-"We ensure that the user follows this sequence by checking the indices of problems, solutions, and runs.\n"
-"\n"
-"Arguments used in each part:\n"
-"    Problem:\n" 
-"        lenx: Length of the material in meters.\n"
-"        alpha: Thermal diffusivity of the material (sq-meters/second).\n"
-"        bc0: Boundary condition at x=0.\n"
-"        bc1: Boundary condition at x=lenx.\n"
-"        ic: Initial condition string (e.g., 'const(1)').\n"
-"    Solution:\n"
-"        probIndex: Index of the associated problem.\n"
-"        dx: x (lenx) increment in meters.\n"
-"        dt: t-increment in seconds.\n"
-"        maxt: Maximum simulation time in seconds.\n"
-"        nx: Number of samples.\n"
-"    Run:\n"
-"        solIndex: Index of the associated solution.\n"
-"        run_name: Name of the run.\n"
-"        savi: How often the temperature profile is saved.\n"
-"        outi: How often the progress is reported.\n"
-"    Results:\n"
-"        runIndex: Index of the run.\n"
-"\n"
-"From here we can then use results to interact with the data and visualize the simulation results.\n"
-"\n"
-"The user can type the following help() commands to get more information on each part.\n"
-"    help(pyheat.problem)\n"
-"    help(pyheat.solution)\n"
-"    help(pyheat.run)\n"
-"    help(pyheat.results)\n"
-"\n"
-"How the example script heat.py works:\n"
-"--------------------------------\n"
-"\n"
-"The example script heat.py demonstrates how to use this module.\n"
-"It initializes a problem, solution, and run, runs the simulation, and retrieves the results.\n"
-"The script then visualizes the results using the matplotlib library.\n"
-"\n"
-"How to use with matlpotlib:\n"
-"--------------------------\n"
-"\n"
-"Once you have the simulation results you can use the matplotlib library to visualize the results.\n"
-"[Note: please ensure you import matlopib.pyplot as plt and sys in your script]\n"
-"Here is an example script that visualizes the results:\n"
-"\n"
-"x = []\n # x values are the distance values\n"
-"for i in range (0,100): \n"
-"    x.append(i*0.01) # iterates through the x values\n"
-"y = results[4] # y values are the temperature values"
-"\n"
-"plt.xlabel('Distance (meters)')\n"
-"plt.ylabel('Temperature (Kelvin)')\n"
-"plt.plot(x,y)\n"
-"plt.show()\n"
-"sys.exit(0)\n"
-"\n"
-"How to integrate with numpy:\n"
-"--------------------------\n"
-"\n"
-"Once you have the simulation results you can use the numpy library to perform numerical operations.\n"
-"[Note: please sure you import numpy as np and sys in your script]\n"
-"Here is an example script that integrates the temperature profile using numpy:\n"
-"\n"
-"... \n"
-"... \n"
-"\n"
-);
-
-
-
-
-
 
 // Define methods exposed to Python
 static PyMethodDef PyHeatMethods[] = 
