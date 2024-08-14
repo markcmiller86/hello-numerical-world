@@ -30,6 +30,8 @@ typedef struct          // Holds solution data
     int probIndex;      // Index of the associated problem
     double uk[MAX_NX];  // Array of u(x,k) to compute/return
     double uk1[MAX_NX]; // Array u(x,k-1) computed at -1 time index ago
+    double uk2[MAX_NX]; // Array u(x,k-2) computed at -2 time index ago
+    char* alg;          // Algorithm used to solve the heat equation (e.g. ftcs or dufrank)
 } HeatSolution;
 
 typedef struct          // Holds run data
@@ -116,16 +118,17 @@ static PyObject* solution(PyObject *self, PyObject *args)
 {
     int probIndex, nx;
     double dx, dt, maxt;
+    char* alg;
     
     // Parse arguments from Python: problem index, dx, dt, maxt, nx
-    if (!PyArg_ParseTuple(args, "idddi", &probIndex, &dx, &dt, &maxt, &nx)) 
+    if (!PyArg_ParseTuple(args, "idddis", &probIndex, &dx, &dt, &maxt, &nx, &alg)) 
     {
         PyErr_SetString(PyExc_TypeError,
         "\n"
         "INVALID ARGUMENTS\n"
-        "Expected parameters: probIndex, dx, dt, maxt, nx (int, float, float, float, int)\n"
+        "Expected parameters: probIndex, dx, dt, maxt, nx, alg (int, float, float, float, int, str)\n"
         "\n"
-        "Example: sol = pyheat.solution(0, 0.01, 0.01, 1.0, 100)\n"
+        "Example: sol = pyheat.solution(0, 0.01, 0.01, 1.0, 100, 'ftcs')\n"
         "\n"
         "For more info type: help(pyheat.solution)\n"
         );
@@ -146,6 +149,7 @@ static PyObject* solution(PyObject *self, PyObject *args)
     sol->maxt = maxt;
     sol->nx = nx;
     sol->probIndex = probIndex;  // Set the problem index
+    sol->alg = strdup(alg);      // Set the algorithm used to solve the heat equation
 
     // Retrieve the problem stucture using the problem index
     HeatProblem *prob = &problems[probIndex];
@@ -206,10 +210,29 @@ static PyObject* run(PyObject *self, PyObject *args)
     int time_steps = (int)(sol->maxt / sol->dt);
     int stable = 1;
 
-    // Run the simulation using the FTCS method
+    // Run the simulation using the selected algorithm
     for (int t = 0; t < time_steps; t++) 
     {
-        stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
+        if (strcmp(sol->alg, "ftcs") == 0) 
+        {
+            stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
+        } 
+        else if (strcmp(sol->alg, "dufrank") == 0) 
+        {
+            stable = update_solution_dufrank(sol->nx, sol->uk, sol->uk1, sol->uk2, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
+        } 
+        else 
+        {
+            PyErr_SetString(PyExc_RuntimeError, "Invalid algorithm");
+            return NULL;
+        }
+
+        // Old code for shifting to uk2 and uk1. May be redundant with copy function below. Ask Mark about the best way to impliment. 
+        // memcpy(sol->uk2, sol->uk1, sol->nx * sizeof(double)); // Copy uk1 to uk2
+        // memcpy(sol->uk1, sol->uk, sol->nx * sizeof(double)); // Copy uk to uk1
+
+        // Old code before incorporating dufrank.c. Delete after debugging
+        // stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
 
         // Stores the temperature profile at regular intervals
         if ((t > 0 && run->savi) && t % (run->savi) == 0) 
@@ -218,6 +241,12 @@ static PyObject* run(PyObject *self, PyObject *args)
            run->t_results[t] = (double *) calloc(sol->nx, sizeof(double)); // stores current temp
 
            copy(sol->nx, run->t_results[t], sol->uk); // copy current temp to t_results
+        }
+
+        if( strcmp(sol->alg, "dufrank") == 0)
+        {
+            // shift uk1 to uk2
+            copy(sol->nx, sol->uk2, sol->uk1);
         }
 
         // Copy current results to array using copy function from utils.c
@@ -343,6 +372,7 @@ PyDoc_STRVAR(module_doc,
 "        dt: t-increment in seconds.\n"
 "        maxt: Maximum simulation time in seconds.\n"
 "        nx: Number of samples.\n"
+"        alg: Algorithm used to solve the heat equation (e.g. 'ftcs' or 'dufrank').\n"
 "    Run:\n"
 "        solIndex: Index of the associated solution.\n"
 "        run_name: Name of the run.\n"
@@ -449,6 +479,8 @@ PyDoc_STRVAR(solution_doc,
 "    Maximum simulation time in seconds.\n"
 "nx : int\n"
 "    Number of samples.\n"
+"alg : str\n"
+"    Algorithm used to solve the heat equation (e.g. 'ftcs' or 'dufrank').\n"
 "\n"
 "Returns\n"
 "-------\n"
@@ -458,7 +490,7 @@ PyDoc_STRVAR(solution_doc,
 "\n"
 "Example\n"
 "-------\n"
-"sol = solution(prob, 0.01, 0.00004, 0.04, 100)\n"
+"sol = solution(prob, 0.01, 0.00004, 0.04, 100, 'ftcs')\n"
 "printf(f'Initialized solution with index: {sol}')\n"
 );
 
