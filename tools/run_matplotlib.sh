@@ -13,7 +13,7 @@ p0=$(perl -e "print $lenx2-$lenp2")
 # Compute right bound of pipe's width
 p1=$(perl -e "print $lenx2+$lenp2")
 
-python -t << EOF 2>/dev/null
+python3 -t << EOF 2>/dev/null
 import matplotlib.pyplot as plt
 import sys, time
 x = []

@@ -118,7 +118,10 @@ initialize(void)
         back2 = (Number*) malloc(Nx * sizeof(Number));
 
     // Initial condition
-    set_initial_condition(Nx, back1, dx, ic);
+    set_initial_condition(Nx, curr, dx, ic);
+    copy(Nx, back1, curr);
+    if (back2)
+        copy(Nx, back2, curr);
 }
 
 int finalize(int ti, Number maxt, Number change)
