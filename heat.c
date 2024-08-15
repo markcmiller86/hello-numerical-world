@@ -115,13 +115,17 @@ initialize(void)
         initialize_crankn(Nx, alpha, dx, dt, &cn_Amat);
 
     if (!strncmp(alg, "dufrank", 7))
+    {
         back2 = (Number*) malloc(Nx * sizeof(Number));
-
-    // Initial condition
-    set_initial_condition(Nx, curr, dx, ic);
-    copy(Nx, back1, curr);
-    if (back2)
-        copy(Nx, back2, curr);
+        /* Set initial condition 2 timesteps back (back2) and use
+           FTCS once to set the initial condition for 1 timestep back (back1) */
+        set_initial_condition(Nx, back2, dx, ic);
+        update_solution_ftcs(Nx, back1, back2, alpha, dx, dt, bc0, bc1);
+    }
+    else
+    {
+        set_initial_condition(Nx, back1, dx, ic);
+    }
 }
 
 int finalize(int ti, Number maxt, Number change)
