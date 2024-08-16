@@ -154,8 +154,17 @@ static PyObject* solution(PyObject *self, PyObject *args)
     // Retrieve the problem stucture using the problem index
     HeatProblem *prob = &problems[probIndex];
 
-    // Set the initial condition using the set_initial_condition function from utils.c
-     set_initial_condition(sol->nx, sol->uk1, sol->dx, prob->ic);
+    if(strcmp(sol->alg, "dufrank") == 0)
+    {
+        set_initial_condition(sol->nx, sol->uk2, sol->dx, prob->ic);
+
+        update_solution_ftcs(sol->nx, sol->uk1, sol->uk2, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
+    }
+    else
+    {
+        // Set the initial condition using the set_initial_condition function from utils.c
+        set_initial_condition(sol->nx, sol->uk1, sol->dx, prob->ic);
+    }
 
     // Return the index of the initialized solution
     return PyLong_FromLong((long)solutionIndex++);
