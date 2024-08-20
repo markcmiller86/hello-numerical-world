@@ -236,13 +236,6 @@ static PyObject* run(PyObject *self, PyObject *args)
             return NULL;
         }
 
-        // Old code for shifting to uk2 and uk1. May be redundant with copy function below. Ask Mark about the best way to impliment. 
-        // memcpy(sol->uk2, sol->uk1, sol->nx * sizeof(double)); // Copy uk1 to uk2
-        // memcpy(sol->uk1, sol->uk, sol->nx * sizeof(double)); // Copy uk to uk1
-
-        // Old code before incorporating dufrank.c. Delete after debugging
-        // stable = update_solution_ftcs(sol->nx, sol->uk, sol->uk1, prob->alpha, sol->dx, sol->dt, prob->bc0, prob->bc1);
-
         // Stores the temperature profile at regular intervals
         if ((t > 0 && run->savi) && t % (run->savi) == 0) 
         {
