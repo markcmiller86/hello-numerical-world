@@ -4,13 +4,39 @@ on:
   push:
     branches: ["CI-CD"]
   pull_request:
-    branches: [ "main" ]
-    
+    branches: ["main"]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler:
+          - { name: 'clang', version: '13' }
+          - { name: 'clang', version: '14' }
+          - { name: 'clang', version: '15' }
+          - { name: 'gnu', version: '10' }
+          - { name: 'gnu', version: '11' }
+          - { name: 'gnu', version: '12' }
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: make check
+
+    - name: Set up compiler
+      run: |
+        sudo apt-get update
+        if [ "${{ matrix.compiler.name }}" == "gnu" ]; then
+          sudo apt-get install -y gcc-${{ matrix.compiler.version }} g++-${{ matrix.compiler.version }}
+          echo "CC=gcc-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+        elif [ "${{ matrix.compiler.name }}" == "clang" ]; then
+          sudo apt-get install -y clang-${{ matrix.compiler.version }}
+          echo "CC=clang-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.compiler.version }}" >> $GITHUB_ENV
+        fi
+
+    - name: Build and test
       run: make check
+      env:
+        CC: ${{ env.CC }}
+        CXX: ${{ env.CXX }}
