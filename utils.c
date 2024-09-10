@@ -176,7 +176,7 @@ set_initial_condition(int n, Number *a, Number dx, char const *ic)
         fclose(icfile);
         free(filename);
     }
-    write_array(TSTART, Nx, dx, a);
+    // write_array(TSTART, Nx, dx, a);
 }
 
 double getWallTimeUsec()
